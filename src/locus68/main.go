@@ -23,7 +23,6 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func RoomHandler(w http.ResponseWriter, r *http.Request) {
-	// vars := mux.Vars(r)
 	http.ServeFile(w, r, "static/room.html")
 }
 

@@ -32,7 +32,7 @@ func (r *Room) run() {
 	for {
 		select {
 		case user := <-r.register:
-			log.Printf("user registered to room %s", r.name)
+			log.Printf("user %s registered to room %s", user.id, r.name)
 			r.users[user] = true
 		case user := <-r.unregister:
 			if _, ok := r.users[user]; ok {
@@ -52,8 +52,9 @@ func (r *Room) run() {
 	}
 }
 
-func registerUser(room *Room, conn *websocket.Conn) {
+func registerUser(id string, room *Room, conn *websocket.Conn) {
 	user := &User{
+		id:   id,
 		room: room,
 		conn: conn,
 		send: make(chan []byte, 256),
@@ -65,6 +66,9 @@ func registerUser(room *Room, conn *websocket.Conn) {
 	go user.readSocket()
 }
 
+func parseUserId() {
+}
+
 func serveRooms(rooms map[string]*Room, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -72,16 +76,21 @@ func serveRooms(rooms map[string]*Room, w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	roomName := r.URL.String()
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		log.Printf("user id not given, user will be anonymous")
+	}
+
+	roomName := r.URL.Path
 	room, ok := rooms[roomName]
 	if ok {
-		log.Printf("user added to room %s", roomName)
+		log.Printf("user %s added to room %s", id, roomName)
 	} else {
-		log.Printf("user created new room %s", roomName)
+		log.Printf("user %s created new room %s", id, roomName)
 		room = newRoom(roomName)
 		rooms[roomName] = room
 		go room.run()
 	}
 
-	registerUser(room, conn)
+	registerUser(id, room, conn)
 }

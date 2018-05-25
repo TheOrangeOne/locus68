@@ -31,7 +31,12 @@
         if (window["WebSocket"]) {
           var pathname = window.location.pathname;
           var roomname = pathname.substr(3, pathname.length);
-          conn = new WebSocket("ws://" + document.location.host + "/ws/" + roomname);
+          var host = document.location.host;
+
+          // https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript#comment39476298_1349404
+          var id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+
+          conn = new WebSocket("ws://" + host + "/ws/" + roomname + "?id=" + id);
           conn.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";

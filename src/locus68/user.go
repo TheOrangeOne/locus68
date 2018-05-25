@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
@@ -31,7 +32,10 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+type UserId string
+
 type User struct {
+	id   string
 	room *Room
 
 	conn *websocket.Conn
@@ -86,7 +90,7 @@ func (u *User) writeSocket() {
 			if err != nil {
 				return
 			}
-			w.Write(message)
+			w.Write([]byte(fmt.Sprintf("%s: %s", u.id, message)))
 
 			// add queued messages to the current websocket message
 			n := len(u.send)
