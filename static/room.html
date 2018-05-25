@@ -7,6 +7,7 @@
         var conn;
         var msg = document.getElementById("msg");
         var log = document.getElementById("log");
+        var roomSetting = document.getElementById("room");
 
         function appendLog(item) {
           var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
@@ -14,6 +15,40 @@
           if (doScroll) {
             log.scrollTop = log.scrollHeight - log.clientHeight;
           }
+        }
+
+        function joinRoom(roomname) {
+          if (!window["WebSocket"]) {
+            var item = document.createElement("div");
+            item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
+            appendLog(item);
+            return;
+          }
+
+          if (conn) {
+            conn.onclose = undefined;
+            conn.close();
+          }
+
+          conn = new WebSocket("ws://" + document.location.host + "/ws/" + roomname);
+          conn.onclose = function (evt) {
+            var item = document.createElement("div");
+            item.innerHTML = "Connection closed.";
+            appendLog(item);
+          };
+
+          conn.onmessage = function (evt) {
+            var messages = evt.data.split('\n');
+            for (var i = 0; i < messages.length; i++) {
+              var item = document.createElement("div");
+              item.innerText = messages[i];
+              appendLog(item);
+            }
+          };
+
+          var item = document.createElement("div");
+          item.innerHTML = "Joined room " + roomname;
+          appendLog(item);
         }
 
         document.getElementById("form").onsubmit = function () {
@@ -28,33 +63,19 @@
           return false;
         };
 
-        if (window["WebSocket"]) {
-          var pathname = window.location.pathname;
-          var roomname = pathname.substr(3, pathname.length);
-          conn = new WebSocket("ws://" + document.location.host + "/ws/" + roomname);
-          conn.onclose = function (evt) {
-            var item = document.createElement("div");
-            item.innerHTML = "<b>Connection closed.</b>";
-            appendLog(item);
-          };
-
-          conn.onmessage = function (evt) {
-            var messages = evt.data.split('\n');
-            for (var i = 0; i < messages.length; i++) {
-              var item = document.createElement("div");
-              item.innerText = messages[i];
-              appendLog(item);
-            }
-          };
-        } else {
-          var item = document.createElement("div");
-          item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-          appendLog(item);
+        roomSetting.onchange = function() {
+          joinRoom(roomSetting.value);
         }
+
+        joinRoom("__DEFAULT__");
       };
     </script>
   </head>
   <body>
+    <form id="settings">
+      <input type="text" placeholder="room name" id="room" size="32"/>
+      <input type="text" placeholder="password" id="key" size="32"/>
+    </form>
     <div id="log"></div>
     <form id="form">
       <input type="submit" value="Send" />
