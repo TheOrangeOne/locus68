@@ -17,6 +17,14 @@
           }
         }
 
+        // https://stackoverflow.com/questions/1349404/generate-random-string-characters-in-javascript#comment39476298_1349404
+        var id = window.localStorage.id || Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
+        window.localStorage.id = id;
+
+        var item = document.createElement("div");
+        item.innerText = "My id is " + id;
+        appendLog(item);
+
         function joinRoom(roomname) {
           if (!window["WebSocket"]) {
             var item = document.createElement("div");
@@ -30,7 +38,8 @@
             conn.close();
           }
 
-          conn = new WebSocket("ws://" + document.location.host + "/ws/" + roomname);
+          conn = new WebSocket("ws://" + document.location.host + "/ws/" + roomname + "?id=" + id);
+
           conn.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "Connection closed.";

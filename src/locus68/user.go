@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
@@ -32,6 +33,7 @@ var upgrader = websocket.Upgrader{
 }
 
 type User struct {
+	id   string
 	room *Room
 
 	conn *websocket.Conn
@@ -61,8 +63,8 @@ func (u *User) readSocket() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		log.Printf("user sent %s", message)
-		u.room.broadcast <- message
+		log.Printf("%s sent %s", u.id, message)
+		u.room.broadcast <- []byte(fmt.Sprintf("%s: %s", u.id, message))
 	}
 }
 
