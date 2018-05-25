@@ -29,12 +29,12 @@ func RoomHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 	r := mux.NewRouter()
-	rooms := make(map[string]*Room)
+	hotel := newHotel()
 
 	r.HandleFunc("/", serveHome).Methods("GET")
 	r.HandleFunc("/r/{room}", RoomHandler).Methods("GET")
 	r.HandleFunc("/ws/{room}", func(w http.ResponseWriter, r *http.Request) {
-		serveRooms(rooms, w, r)
+		hotel.serveHotel(w, r)
 	})
 	http.Handle("/", r)
 

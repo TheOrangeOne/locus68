@@ -32,8 +32,6 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-type UserId string
-
 type User struct {
 	id   string
 	room *Room
@@ -65,8 +63,8 @@ func (u *User) readSocket() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		log.Printf("user sent %s", message)
-		u.room.broadcast <- message
+		log.Printf("%s sent %s", u.id, message)
+		u.room.broadcast <- []byte(fmt.Sprintf("%s: %s", u.id, message))
 	}
 }
 
@@ -90,7 +88,7 @@ func (u *User) writeSocket() {
 			if err != nil {
 				return
 			}
-			w.Write([]byte(fmt.Sprintf("%s: %s", u.id, message)))
+			w.Write(message)
 
 			// add queued messages to the current websocket message
 			n := len(u.send)

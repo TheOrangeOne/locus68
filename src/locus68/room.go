@@ -1,9 +1,7 @@
 package main
 
 import (
-	"github.com/gorilla/websocket"
 	"log"
-	"net/http"
 )
 
 type Room struct {
@@ -50,47 +48,4 @@ func (r *Room) run() {
 			}
 		}
 	}
-}
-
-func registerUser(id string, room *Room, conn *websocket.Conn) {
-	user := &User{
-		id:   id,
-		room: room,
-		conn: conn,
-		send: make(chan []byte, 256),
-	}
-
-	user.room.register <- user
-
-	go user.writeSocket()
-	go user.readSocket()
-}
-
-func parseUserId() {
-}
-
-func serveRooms(rooms map[string]*Room, w http.ResponseWriter, r *http.Request) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		log.Printf("user id not given, user will be anonymous")
-	}
-
-	roomName := r.URL.Path
-	room, ok := rooms[roomName]
-	if ok {
-		log.Printf("user %s added to room %s", id, roomName)
-	} else {
-		log.Printf("user %s created new room %s", id, roomName)
-		room = newRoom(roomName)
-		rooms[roomName] = room
-		go room.run()
-	}
-
-	registerUser(id, room, conn)
 }
