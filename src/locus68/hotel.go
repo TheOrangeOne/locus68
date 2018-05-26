@@ -8,36 +8,40 @@ import (
 
 type Hotel struct {
 	rooms map[string]*Room
-	// users map[string]*User
 }
 
 func newHotel() *Hotel {
 	return &Hotel{
 		rooms: make(map[string]*Room),
-		// users: make(map[string]*User),
 	}
 }
 
-// check a user in to a room
-func (h *Hotel) checkinUser(id string, room *Room, conn *websocket.Conn) {
-	user := &User{
+// check a guest in to a room
+func (h *Hotel) checkinGuest(id string, room *Room, conn *websocket.Conn) {
+	guest := &Guest{
 		id:   id,
 		room: room,
 		conn: conn,
 		send: make(chan []byte, 256),
 	}
-	user.room.register <- user
+	guest.room.register <- guest
 
-	go user.writeSocket()
-	go user.readSocket()
+	go guest.writeSocket()
+	go guest.readSocket()
 }
 
 func (h *Hotel) prepareRoom(roomName string) *Room {
 	log.Printf("prepared new room %s", roomName)
 	room := newRoom(roomName)
 	h.rooms[roomName] = room
-	go room.run()
+	go h.reservation(room)
 	return room
+}
+
+func (h *Hotel) reservation(room *Room) {
+	room.reserve()
+	delete(h.rooms, room.name)
+	log.Printf("unreserved room %s", room.name)
 }
 
 func (h *Hotel) serveHotel(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +53,9 @@ func (h *Hotel) serveHotel(w http.ResponseWriter, r *http.Request) {
 
 	id := r.URL.Query().Get("id")
 	if id == "" {
-		log.Printf("user id not given, user will be anonymous")
+		log.Printf("id not given dropping connection")
+		conn.Close()
+		return
 	}
 
 	roomName := r.URL.Path
@@ -58,5 +64,5 @@ func (h *Hotel) serveHotel(w http.ResponseWriter, r *http.Request) {
 		room = h.prepareRoom(roomName)
 	}
 
-	h.checkinUser(id, room, conn)
+	h.checkinGuest(id, room, conn)
 }

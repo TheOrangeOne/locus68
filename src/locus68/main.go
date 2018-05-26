@@ -33,9 +33,7 @@ func main() {
 
 	r.HandleFunc("/", serveHome).Methods("GET")
 	r.HandleFunc("/r/{room}", RoomHandler).Methods("GET")
-	r.HandleFunc("/ws/{room}", func(w http.ResponseWriter, r *http.Request) {
-		hotel.serveHotel(w, r)
-	})
+	r.HandleFunc("/ws/{room}", hotel.serveHotel)
 	http.Handle("/", r)
 
 	err := http.ListenAndServe(*addr, nil)

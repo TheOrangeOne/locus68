@@ -32,7 +32,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-type User struct {
+type Guest struct {
 	id   string
 	room *Room
 
@@ -41,21 +41,21 @@ type User struct {
 	send chan []byte
 }
 
-func (u *User) readSocket() {
+func (g *Guest) readSocket() {
 	defer func() {
-		u.room.unregister <- u
-		u.conn.Close()
+		g.room.unregister <- g
+		g.conn.Close()
 	}()
 
-	u.conn.SetReadLimit(maxMessageSize)
-	u.conn.SetReadDeadline(time.Now().Add(pongWait))
-	u.conn.SetPongHandler(func(string) error {
-		u.conn.SetReadDeadline(time.Now().Add(pongWait))
+	g.conn.SetReadLimit(maxMessageSize)
+	g.conn.SetReadDeadline(time.Now().Add(pongWait))
+	g.conn.SetPongHandler(func(string) error {
+		g.conn.SetReadDeadline(time.Now().Add(pongWait))
 		return nil
 	})
 
 	for {
-		_, message, err := u.conn.ReadMessage()
+		_, message, err := g.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
@@ -63,46 +63,46 @@ func (u *User) readSocket() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		log.Printf("%s sent %s", u.id, message)
-		u.room.broadcast <- []byte(fmt.Sprintf("%s: %s", u.id, message))
+		log.Printf("%s sent %s", g.id, message)
+		g.room.broadcast <- []byte(fmt.Sprintf("%s: %s", g.id, message))
 	}
 }
 
-func (u *User) writeSocket() {
+func (g *Guest) writeSocket() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		u.conn.Close()
+		g.conn.Close()
 	}()
 	for {
 		select {
-		case message, ok := <-u.send:
-			u.conn.SetWriteDeadline(time.Now().Add(writeWait))
+		case message, ok := <-g.send:
+			g.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// room closed the channel
-				u.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				g.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 
-			w, err := u.conn.NextWriter(websocket.TextMessage)
+			w, err := g.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
 			}
 			w.Write(message)
 
 			// add queued messages to the current websocket message
-			n := len(u.send)
+			n := len(g.send)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
-				w.Write(<-u.send)
+				w.Write(<-g.send)
 			}
 
 			if err := w.Close(); err != nil {
 				return
 			}
 		case <-ticker.C:
-			u.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err := u.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+			g.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := g.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
 		}

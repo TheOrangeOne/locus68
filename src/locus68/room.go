@@ -7,43 +7,51 @@ import (
 type Room struct {
 	name string
 
-	users map[*User]bool
+	guests map[*Guest]bool
 
 	broadcast chan []byte
 
-	register chan *User
+	register chan *Guest
 
-	unregister chan *User
+	unregister chan *Guest
 }
 
 func newRoom(name string) *Room {
 	return &Room{
 		name:       name,
 		broadcast:  make(chan []byte),
-		register:   make(chan *User),
-		unregister: make(chan *User),
-		users:      make(map[*User]bool),
+		register:   make(chan *Guest),
+		unregister: make(chan *Guest),
+		guests:     make(map[*Guest]bool),
 	}
 }
 
-func (r *Room) run() {
+// a reserved room allows guests to enter and exit freely
+func (r *Room) reserve() {
 	for {
 		select {
-		case user := <-r.register:
-			log.Printf("user %s registered to room %s", user.id, r.name)
-			r.users[user] = true
-		case user := <-r.unregister:
-			if _, ok := r.users[user]; ok {
-				delete(r.users, user)
-				close(user.send)
+		case guest := <-r.register:
+			r.guests[guest] = true
+			log.Printf("%s entered room %s", guest.id, r.name)
+		case guest := <-r.unregister:
+			if _, ok := r.guests[guest]; ok {
+				delete(r.guests, guest)
+				close(guest.send)
+				log.Printf("%s left room %s", guest.id, r.name)
+			}
+
+			// finish if there are no more guests
+			if len(r.guests) == 0 {
+				// TODO: timeout mechanism?
+				return
 			}
 		case message := <-r.broadcast:
-			for user := range r.users {
+			for guest := range r.guests {
 				select {
-				case user.send <- message:
+				case guest.send <- message:
 				default:
-					close(user.send)
-					delete(r.users, user)
+					close(guest.send)
+					delete(r.guests, guest)
 				}
 			}
 		}
