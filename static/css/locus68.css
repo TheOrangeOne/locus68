@@ -1,0 +1,123 @@
+/* help I don't know what I'm doing */
+html, body {
+  height: 100%;
+}
+
+/* stolen from SO:
+http://stackoverflow.com/questions/90178/make-a-div-fill-the-height-of-the-remaining-screen-space
+*/
+.box {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+.box .row.header {
+  flex: 0 1 auto;
+}
+
+#title {
+  margin-left: 0.2em;
+  font-size: 1.25em;
+}
+
+h1, h2 {
+  font-weight: 300;
+  font-size: 1.5em;
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+}
+
+
+.box .row.content {
+  flex: 1 1 auto;
+}
+
+#map {}
+
+.box .row.footer {
+  margin-top: 0.25em;
+  margin-left: 0.2em;
+  flex: 0 1 40px;
+}
+
+/* stolen from https://www.abeautifulsite.net/how-to-make-rounded-images-with-css */
+.img-circle {
+  border-radius: 50%;
+}
+
+/* figured this one out myself! */
+.pps {
+  width: 1.7em;
+  height: 1.7em;
+  cursor: pointer;
+}
+
+.tracker {
+  width: 4em;
+  height: 4em;
+  border-color: gray;
+  border-width: 0.15em;
+  border-style: solid;
+  background-color: grey;
+  background: rgba(187, 187, 187, 0.28);
+}
+
+.untracked {
+  opacity: 0.5;
+}
+
+.right {
+  position: absolute;
+  right: 0.2em;
+}
+
+input {
+  border: none;
+  overflow: hidden;
+  line-height: 1;
+  resize: none;
+}
+
+/* http://stackoverflow.com/questions/3397113/how-to-remove-border-outline-around-text-input-boxes-chrome
+*/
+textarea:focus, input:focus {
+  outline: none;
+}
+
+#id {
+  float: left;
+}
+
+.right {
+  float: right;
+}
+
+/*
+https://purecss.io/grids/
+*/
+.pure-g > div {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.l-box {
+  padding: 1em;
+}
+
+.full {
+  width: 100%;
+}
+
+/* https://vuejs.org/v2/guide/transitions.html */
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s
+}
+.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+  opacity: 0
+}
+
+.left {
+  float: left;
+  text-align: left;
+}

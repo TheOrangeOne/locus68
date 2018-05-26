@@ -23,6 +23,10 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 }
 
 func RoomHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "static/map.html")
+}
+
+func TestRoomHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "static/room.html")
 }
 
@@ -33,9 +37,11 @@ func main() {
 
 	r.HandleFunc("/", serveHome).Methods("GET")
 	r.HandleFunc("/r/{room}", RoomHandler).Methods("GET")
+	r.HandleFunc("/t/{room}", TestRoomHandler).Methods("GET")
 	r.HandleFunc("/ws/{room}", hotel.serveHotel)
 	http.Handle("/", r)
 
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
