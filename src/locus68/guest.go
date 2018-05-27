@@ -1,8 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
 	"time"
@@ -62,18 +60,20 @@ func (g *Guest) readSocket() {
 			}
 			break
 		}
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+
 		log.Printf("%s sent %s", g.id, message)
-		g.room.broadcast <- []byte(fmt.Sprintf("%s: %s", g.id, message))
+		g.room.broadcast <- message
 	}
 }
 
 func (g *Guest) writeSocket() {
 	ticker := time.NewTicker(pingPeriod)
+
 	defer func() {
 		ticker.Stop()
 		g.conn.Close()
 	}()
+
 	for {
 		select {
 		case message, ok := <-g.send:
@@ -84,7 +84,11 @@ func (g *Guest) writeSocket() {
 				return
 			}
 
-			w, err := g.conn.NextWriter(websocket.TextMessage)
+			// TODO: look into how much overhead there is to decode messages
+			//       since we just pass them on, we really don't need to decode
+			//       at all.. unless we are gonna hold pub keys and drop unknown
+			//       senders
+			w, err := g.conn.NextWriter(websocket.TextMessage) // TODO: BinaryMessage?
 			if err != nil {
 				return
 			}
@@ -93,7 +97,6 @@ func (g *Guest) writeSocket() {
 			// add queued messages to the current websocket message
 			n := len(g.send)
 			for i := 0; i < n; i++ {
-				w.Write(newline)
 				w.Write(<-g.send)
 			}
 

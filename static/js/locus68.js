@@ -1,35 +1,74 @@
+// TODO: user, map, location can probably be abstracted out
+//       this would be a premature optimization atm
 function Locus(map) {
-  // a leaflet map
-  this.map = map;
-
-  // the user
-  this.user = {
-    id: null,
-    room: DEFAULT_ROOM,
-    lat: null,
-    lng: null,
-    img: DEFAULT_PP
-  };
-
-  // users in the room
-  this.users = {};
-
+  // thx javascript
   var self = this;
 
+  // the user
+  this.user;
+
+  // other users in the room
+  this.users = {};
+
+  // websocket stuff
+  this.conn;   // websocket connection
+
   // map stuff
-  this.el_lock = null;   // the lower left icon
+  this.FOCUS_ZOOM_LEVEL = 18;
+  this.elLock;   // the lower left icon
   this.zooming = false;  // zoom in progress
-  this.zoomLevel = 17;
   this.follow = false;   // have the map track the movement
 
+
+  // try to restore data from browser storage
+  this.restore = function() {
+    // TODO
+  };
+
+  this.initUser = function() {
+    // attempt to restore
+    self.restore();
+
+    var id = Math.random()
+      .toString(36)
+      .replace(/[^a-z]+/g, '')
+      .substr(0, 5);
+
+    self.user = {
+      id: id,
+      lat: null,
+      lng: null,
+      img: DEFAULT_PP
+    };
+  };
+
+  // encrypt, sign and finally send a message
+  this.sendMsg = function(msg) {
+    // TODO: crypto stuff
+    self.conn.send(msg);
+  };
+
+  this.locationUpdateMsg = function() {
+    var user = self.user;
+    var conn = self.conn;
+
+    var msg = {
+      type: MSG_TYPE.LOC_UPDATE,
+      data: {
+        lat: user.lat,
+        lng: user.lng
+      },
+      user: user.id
+    };
+
+    return msg;
+  };
+
   this.setUserLatLng = function(pos) {
-    var user = this.user;
+    var user = self.user;
     user.lat = pos.coords.latitude;
     user.lng = pos.coords.longitude;
-    if (user.marker) {
-      user.marker.setLatLng(new L.LatLng(user.lat, user.lng));
-    }
-  }
+  };
 
   this.userMarkerClick = function() {
     console.log('clicked!');
@@ -49,41 +88,46 @@ function Locus(map) {
     }
   };
 
-  this.handleChangedLocation = function(position) {
+  this.handleLocationUpdate = function(position) {
     var user = self.user;
     var lat = position.coords.lattitude;
     var lon = position.coords.longitude;
 
     if (lat !== user.lat || lon !== user.lon) {
+      // update the user state
       self.setUserLatLng(position);
+
+      // update the user's marker on the map
+      self.updateUserMarker();
+
+      // if set to follow the user then adjust the map view accordingly
       if (self.follow && !self.zooming) {
         self.map.setView([user.lat, user.lng], self.map.getZoom());
       }
-      self.updateUserMarker();
     }
   };
 
   this.toggleFollowMovement = function() {
     var user = self.user;
     self.follow = !self.follow;
-    self.el_lock.setAttribute('src', user.img);
+    self.elLock.setAttribute('src', user.img);
     if (self.follow) {
-      self.el_lock.classList.remove('untracked');
-      self.map.setView([user.lat, user.lng], self.zoomLevel);
+      self.elLock.classList.remove('untracked');
+      self.map.setView([user.lat, user.lng], self.FOCUS_ZOOM_LEVEL);
     } else {
-      self.el_lock.classList.add('untracked');
+      self.elLock.classList.add('untracked');
     }
   };
 
   this.focusUser = function(user) {
-    self.map.flyTo([user.lat, user.lng], self.zoomLevel, {
+    self.map.flyTo([user.lat, user.lng], self.FOCUS_ZOOM_LEVEL, {
       //duration: 5
     });
   };
 
   this.focusOther = function(users, otherid) {
     var other = self.users[otherid];
-    self.map.flyTo([other.lat, other.lng], self.zoomLevel, {
+    self.map.flyTo([other.lat, other.lng], self.FOCUS_ZOOM_LEVEL, {
       //duration: 5
     });
 
@@ -99,7 +143,7 @@ function Locus(map) {
     }).addTo(map);
 
     // the lock button in the lower left
-    var el_lock = null;
+    var elLock = null;
 
     map.on('zoomstart', function() {
       self.zooming = true;
@@ -130,7 +174,7 @@ function Locus(map) {
         var el = L.DomUtil.create('img', 'img-circle tracker untracked');
         el.setAttribute('src', self.user.img);
         el.onclick = self.toggleFollowMovement;
-        self.el_lock = el;
+        self.elLock = el;
         return el;
       }
     });
@@ -140,13 +184,54 @@ function Locus(map) {
     self.map = map;
   };
 
+  this.initSocket = function() {
+    var conn;
+    var baseURL;
+    var wsURL;
+    var room = self.room;
+    var id   = self.user.id;
+
+    if (!window['WebSocket']) {
+      // TODO: appropriate error
+    }
+
+    baseURL = 'ws://' + document.location.host + '/ws/';
+    wsURL = baseURL + room + '?id=' + id;
+
+    conn = new WebSocket(wsURL);
+    console.log('creating new socket');
+
+    conn.onopen = function(evl) {
+      // self.sendMsg(self.locationUpdateMsg());
+    }
+
+    conn.onclose = function(evl) {
+      console.log('connection closed!');
+    }
+
+    conn.onmessage = function(evt) {
+      console.log(evt.data);
+    }
+
+    // set the connection
+    self.conn = conn;
+  };
+
   this.init = function() {
+    var pathname = window.location.pathname;
+    self.room = pathname.substr(3, pathname.length);
+
+    // initialize the user from saved state or generate new
+    self.initUser();
 
     // initialize the location stuff
-    initLocation(self.handleChangedLocation);
+    initLocation(self.handleLocationUpdate);
 
     // initialize the map
     self.initMap();
+
+    // initialize the socket connection
+    self.initSocket();
   };
 
   this.init();
@@ -154,5 +239,5 @@ function Locus(map) {
 
 
 window.onload = function() {
-  var locus = new Locus(map);
+  var locus = new Locus();
 }
