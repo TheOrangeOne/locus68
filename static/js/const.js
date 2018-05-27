@@ -2,6 +2,9 @@ var DEFAULT_AVATAR = '/static/img/def.png';
 var USER_AVATAR = getRandomPP();
 var ICON_SIZE = 42; // '0.5em';
 
+// the interval in which to persist to localStorage (milliseconds)
+var PERSIST_INTERVAL = 5000;
+
 // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#Ready_state_constants
 var WS_STATE = {
   CONNECTING: 0,

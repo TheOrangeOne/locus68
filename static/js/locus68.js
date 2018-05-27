@@ -22,14 +22,25 @@ function Locus() {
   this.elGroup; // the upper left control
 
 
-  // try to restore data from browser storage
-  this.restore = function() {
-    // TODO
+  this.makeUser = function() {
+    var user = {
+      id: undefined,
+      lat: undefined,
+      lng: undefined,
+      img: undefined,
+      marker: undefined
+    };
+
+    return user;
   };
 
   this.initUser = function() {
     // attempt to restore
     self.restore();
+
+    var user = self.user;
+
+    console.log('restored user', user);
 
     var id = Math.random()
       .toString(36)
@@ -37,11 +48,82 @@ function Locus() {
       .substr(0, 5);
 
     self.user = {
-      id: id,
-      lat: null,
-      lng: null,
-      img: USER_AVATAR
+      id: user.id || id,
+      lat: user.lat || null,
+      lng: user.lng || null,
+      img: user.img || USER_AVATAR
     };
+  };
+
+  // serialize a user so that it can be persisted
+  this.serializeUser = function(user) {
+    // what to actually serialize for a user
+    var serUser = {
+      id: user.id,
+      lat: user.lat,
+      lng: user.lng,
+      img: user.img
+    };
+
+    return JSON.stringify(serUser);
+  };
+
+  // deserialize a persisted user
+  this.deserializeUser = function(serUser) {
+    var user;
+    try {
+      user = JSON.parse(serUser);
+    }
+    catch (err) {
+      user = self.makeUser();
+    }
+
+    return user;
+  };
+
+  // restore the specific user from localStorage
+  // if restoring fails for some reason, then just make a new user
+  this.restoreThisUser = function() {
+    var user;
+
+    if (window.localStorage.user) {
+      var serUser = localStorage.getItem('user');
+      console.log('localStorage user', serUser);
+      user = self.deserializeUser(serUser);
+    } else {
+      user = self.makeUser();
+    }
+
+    self.user = user;
+  };
+
+  // persist the specific user to localStorage
+  this.persistThisUser = function() {
+    var serUser = self.serializeUser(self.user);
+    console.log('persisting user', serUser);
+    localStorage.setItem('user', serUser);
+  };
+
+  // try to restore data from browser storage
+  this.restore = function() {
+    self.restoreThisUser();
+  };
+
+
+  // persist all relevant state to localStorage to allow seamless
+  // rejoining
+  this.persist = function() {
+    self.persistThisUser();
+  }
+
+  this.persistor = function() {
+    self.persist();
+    setTimeout(self.persistor, PERSIST_INTERVAL);
+  }
+
+  // initialize a persistor
+  this.initPersistor = function() {
+    this.persistor();
   };
 
   // encrypt, sign and finally send a message
@@ -338,6 +420,7 @@ function Locus() {
 
     if (!window['WebSocket']) {
       // TODO: appropriate error
+      console.error('websockets not supported by this browser');
     }
 
     baseURL = 'ws://' + document.location.host + '/ws/';
@@ -376,6 +459,9 @@ function Locus() {
 
     // initialize the socket connection
     self.initSocket();
+
+    // initialize the persistance logic
+    self.initPersistor();
   };
 
   this.init();
