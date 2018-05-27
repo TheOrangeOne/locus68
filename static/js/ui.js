@@ -53,7 +53,6 @@ var LocusUI = {
         var nusers = Object.keys(users).length
         for (userid in users) {
           var u = users[userid];
-          console.log(u);
           var offsetAngle = 360 / nusers;
           var rotateAngle = offsetAngle * i++;
 

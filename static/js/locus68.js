@@ -253,6 +253,9 @@ function Locus() {
 
   this.focusGroup = function() {
     self.map.fitBounds(self.group.getBounds().pad(0.5));
+    if (self.follow) {
+      self.toggleFollowMovement();
+    }
   };
 
   this.focusUser = function(user) {
@@ -319,10 +322,7 @@ function Locus() {
     });
     map.addControl(new lockControl());
 
-    // var gc = new groupControl();
-    // map.addControl(gc);
-    // map.removeControl(gc);
-
+    // create a group for the markers
     var group = new L.FeatureGroup().addTo(map);
 
     self.group = group;
@@ -346,7 +346,6 @@ function Locus() {
     conn = new WebSocket(wsURL);
 
     conn.onopen = function(evl) {
-      self.sendSyncMsgs();
     }
 
     conn.onclose = function(evl) {
