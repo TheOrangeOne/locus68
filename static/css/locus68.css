@@ -121,3 +121,26 @@ https://purecss.io/grids/
   float: left;
   text-align: left;
 }
+
+#group {
+	background-color: white;
+	height: 60px;
+	width: 60px;
+	border-radius: 50%;
+	position: relative;
+  opacity: 0.6;
+  border-color: gray;
+  border-width: 0.15em;
+  border-style: solid;
+}
+
+.group-item{
+	list-style: none;
+	height: 20px;
+	width: 20px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+  margin-left: -10px;
+  margin-top: -10px;
+}

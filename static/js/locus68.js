@@ -18,6 +18,8 @@ function Locus() {
   this.elLock;   // the lower left icon
   this.zooming = false;  // zoom in progress
   this.follow = false;   // have the map track the movement
+  this.group;            // leaflet featureGroup
+  this.elGroup; // the upper left control
 
 
   // try to restore data from browser storage
@@ -101,6 +103,7 @@ function Locus() {
 
     // finally, render the user feed
     LocusUI.renderUserFeed(users, self.focusOther);
+    LocusUI.renderUserGroup(self);
   };
 
   this.handleUserAvatarUpdate = function(userId, data) {
@@ -116,6 +119,7 @@ function Locus() {
 
     // update the user feed
     LocusUI.renderUserFeed(users, self.focusOther);
+    LocusUI.renderUserGroup(self);
   };
 
   this.msgHandlers = {
@@ -187,7 +191,7 @@ function Locus() {
       var icon = makeMapIcon(ICON_SIZE, user.img);
       user.marker = L.marker([user.lat, user.lng], {
         icon: icon
-      }).addTo(self.map);
+      }).addTo(self.group);
       user.marker.on('click', self.userMarkerClick);
     } else {
       user.marker.setLatLng([user.lat, user.lng]);
@@ -247,6 +251,10 @@ function Locus() {
     }
   };
 
+  this.focusGroup = function() {
+    self.map.fitBounds(self.group.getBounds().pad(0.5));
+  };
+
   this.focusUser = function(user) {
     self.map.flyTo([user.lat, user.lng], self.FOCUS_ZOOM_LEVEL, {
       //duration: 5
@@ -265,7 +273,9 @@ function Locus() {
   };
 
   this.initMap = function() {
-    var map = L.map('map').setView([46.423, -100.3248], 3);
+    var map = L.map('map', {
+      zoomControl: false
+    }).setView([46.423, -100.3248], 3);
     L.tileLayer('https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '<a href="http://osm.org/copyright">OSM</a>'
     }).addTo(map);
@@ -294,6 +304,7 @@ function Locus() {
       map.removeEventListener('mousemove');
     });
 
+    // create the follow-lock control
     var lockControl = L.Control.extend({
       options: {
         position: 'bottomleft'
@@ -306,9 +317,15 @@ function Locus() {
         return el;
       }
     });
-
     map.addControl(new lockControl());
 
+    // var gc = new groupControl();
+    // map.addControl(gc);
+    // map.removeControl(gc);
+
+    var group = new L.FeatureGroup().addTo(map);
+
+    self.group = group;
     self.map = map;
   };
 
