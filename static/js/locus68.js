@@ -38,14 +38,74 @@ function Locus(map) {
       id: id,
       lat: null,
       lng: null,
-      img: DEFAULT_PP
+      img: USER_AVATAR
     };
   };
 
   // encrypt, sign and finally send a message
   this.sendMsg = function(msg) {
-    // TODO: crypto stuff
-    self.conn.send(msg);
+    // TODO: encrypt, sign
+    var conn = self.conn;
+    if (conn && conn.readyState == WS_STATE.OPEN) {
+      conn.send(JSON.stringify(msg));
+    }
+  };
+
+  this.recvMsg = function(data) {
+    // TODO: verify, decrypt
+    return JSON.parse(data);
+  };
+
+  this.updateUserLocation = function(userId, lat, lng) {
+    var user = self.users[userId];
+    user.lat = lat;
+    user.lng = lng;
+  };
+
+  this.createUser = function(userId, lat, lng) {
+    self.users[userId] = {
+      lat: lat,
+      lng: lng,
+      img: DEFAULT_AVATAR,
+      marker: undefined
+    };
+  };
+
+  // handle a location update for a user
+  this.handleUserLocationUpdate = function(userId, data) {
+    var user = self.user;
+    var users = self.users;
+
+    if (userId === user.id)
+      return
+
+    // create or update the user's location
+    if (userId in users) {
+      self.updateUserLocation(userId, data.lat, data.lng);
+    }
+    else {
+      self.createUser(userId, data.lat, data.lng);
+    }
+
+    user = users[userId];
+
+    // update the user's marker
+    self.updateUserMarker(user);
+
+    // finally, render the user feed
+    LocusUI.renderUserFeed(users, self.focusOther);
+  };
+
+  this.msgHandlers = {
+    [MSG_TYPE.LOC_UPDATE]: this.handleUserLocationUpdate
+  };
+
+  this.handleMsg = function(msg) {
+    if (msg.type in self.msgHandlers) {
+      self.msgHandlers[msg.type](msg.user, msg.data);
+    } else {
+      console.error('handler does not exist for msg type');
+    }
   };
 
   this.locationUpdateMsg = function() {
@@ -74,9 +134,7 @@ function Locus(map) {
     console.log('clicked!');
   };
 
-  this.updateUserMarker = function(regen) {
-    var user = self.user;
-
+  this.updateUserMarker = function(user) {
     if (!user.marker) {
       var icon = makeMapIcon(ICON_SIZE, user.img);
       user.marker = L.marker([user.lat, user.lng], {
@@ -98,12 +156,15 @@ function Locus(map) {
       self.setUserLatLng(position);
 
       // update the user's marker on the map
-      self.updateUserMarker();
+      self.updateUserMarker(user);
 
       // if set to follow the user then adjust the map view accordingly
       if (self.follow && !self.zooming) {
         self.map.setView([user.lat, user.lng], self.map.getZoom());
       }
+
+      // send out a message with the updated location
+      self.sendMsg(self.locationUpdateMsg());
     }
   };
 
@@ -125,7 +186,7 @@ function Locus(map) {
     });
   };
 
-  this.focusOther = function(users, otherid) {
+  this.focusOther = function(otherid) {
     var other = self.users[otherid];
     self.map.flyTo([other.lat, other.lng], self.FOCUS_ZOOM_LEVEL, {
       //duration: 5
@@ -199,10 +260,9 @@ function Locus(map) {
     wsURL = baseURL + room + '?id=' + id;
 
     conn = new WebSocket(wsURL);
-    console.log('creating new socket');
 
     conn.onopen = function(evl) {
-      // self.sendMsg(self.locationUpdateMsg());
+      self.sendMsg(self.locationUpdateMsg());
     }
 
     conn.onclose = function(evl) {
@@ -210,7 +270,8 @@ function Locus(map) {
     }
 
     conn.onmessage = function(evt) {
-      console.log(evt.data);
+      var msg = self.recvMsg(evt.data);
+      self.handleMsg(msg);
     }
 
     // set the connection
