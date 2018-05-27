@@ -2,6 +2,7 @@ var DEFAULT_AVATAR = '/static/img/def.png';
 var USER_AVATAR = getRandomPP();
 var ICON_SIZE = 42; // '0.5em';
 
+// https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#Ready_state_constants
 var WS_STATE = {
   CONNECTING: 0,
   OPEN: 1,
@@ -19,7 +20,7 @@ var WS_STATE = {
  * }
  */
 var MSG_TYPE = {
-  LOC_UPDATE: 'locu',  // location update for a user
-  USER_DC: 'userdc',   // user disconnected
-  AVATAR: 'ava'        // avatar update for a user
+  LOCATION_UPDATE: 'locu',    // location update for a user
+  USER_DISCONNECT: 'userdc',  // user disconnected
+  AVATAR_UPDATE: 'ava'        // avatar update for a user
 };

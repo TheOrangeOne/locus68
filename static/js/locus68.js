@@ -1,6 +1,6 @@
 // TODO: user, map, location can probably be abstracted out
 //       this would be a premature optimization atm
-function Locus(map) {
+function Locus() {
   // thx javascript
   var self = this;
 
@@ -53,7 +53,14 @@ function Locus(map) {
 
   this.recvMsg = function(data) {
     // TODO: verify, decrypt
-    return JSON.parse(data);
+    var msg = JSON.parse(data);
+
+    // TODO: proper verification and handling
+    console.assert('user' in msg);
+    console.assert('type' in msg);
+    console.assert('data' in msg);
+
+    return msg;
   };
 
   this.updateUserLocation = function(userId, lat, lng) {
@@ -73,18 +80,18 @@ function Locus(map) {
 
   // handle a location update for a user
   this.handleUserLocationUpdate = function(userId, data) {
-    var user = self.user;
+    var user;
     var users = self.users;
-
-    if (userId === user.id)
-      return
 
     // create or update the user's location
     if (userId in users) {
       self.updateUserLocation(userId, data.lat, data.lng);
     }
     else {
-      self.createUser(userId, data.lat, data.lng);
+      user = self.createUser(userId, data.lat, data.lng);
+
+      // send out our location in response to the new user
+      self.sendSyncMsgs();
     }
 
     user = users[userId];
@@ -96,12 +103,32 @@ function Locus(map) {
     LocusUI.renderUserFeed(users, self.focusOther);
   };
 
+  this.handleUserAvatarUpdate = function(userId, data) {
+    var users = self.users;
+    if (!(userId in users)) {
+      console.error('userId not in users');
+      return;
+    }
+
+    var user = users[userId];
+
+    self.updateUserAvatar(user, data.img);
+
+    // update the user feed
+    LocusUI.renderUserFeed(users, self.focusOther);
+  };
+
   this.msgHandlers = {
-    [MSG_TYPE.LOC_UPDATE]: this.handleUserLocationUpdate
+    [MSG_TYPE.LOCATION_UPDATE]: this.handleUserLocationUpdate,
+    [MSG_TYPE.AVATAR_UPDATE]: this.handleUserAvatarUpdate
   };
 
   this.handleMsg = function(msg) {
     if (msg.type in self.msgHandlers) {
+      // shortcut if the message if from us
+      if (msg.user === self.user.id)
+        return;
+
       self.msgHandlers[msg.type](msg.user, msg.data);
     } else {
       console.error('handler does not exist for msg type');
@@ -110,18 +137,39 @@ function Locus(map) {
 
   this.locationUpdateMsg = function() {
     var user = self.user;
-    var conn = self.conn;
 
     var msg = {
-      type: MSG_TYPE.LOC_UPDATE,
+      user: user.id,
+      type: MSG_TYPE.LOCATION_UPDATE,
       data: {
         lat: user.lat,
         lng: user.lng
       },
-      user: user.id
     };
 
     return msg;
+  };
+
+  this.avatarUpdateMsg = function() {
+    var user = self.user;
+
+    var msg = {
+      user: user.id,
+      type: MSG_TYPE.AVATAR_UPDATE,
+      data: {
+        img: user.img
+      }
+    };
+
+    return msg;
+  };
+
+  this.disconnectMsg = function() {
+    return {
+      user: user.id,
+      type: MSG_TYPE.USER_DC,
+      data: {}
+    };
   };
 
   this.setUserLatLng = function(pos) {
@@ -135,7 +183,7 @@ function Locus(map) {
   };
 
   this.updateUserMarker = function(user) {
-    if (!user.marker) {
+    if (!user.marker && user.lat && user.lng) {
       var icon = makeMapIcon(ICON_SIZE, user.img);
       user.marker = L.marker([user.lat, user.lng], {
         icon: icon
@@ -144,6 +192,25 @@ function Locus(map) {
     } else {
       user.marker.setLatLng([user.lat, user.lng]);
     }
+  };
+
+  this.updateUserAvatar = function(user, img) {
+    var map = self.map;
+
+    // remove the marker from the map
+    map.removeLayer(user.marker);
+
+    // set the fields in the user
+    user.img = img;
+    user.marker = undefined;
+
+    self.updateUserMarker(user);
+  };
+
+  // sends all relevant information to bring a new user up to speed
+  this.sendSyncMsgs = function() {
+    self.sendMsg(self.locationUpdateMsg());
+    self.sendMsg(self.avatarUpdateMsg());
   };
 
   this.handleLocationUpdate = function(position) {
@@ -163,7 +230,7 @@ function Locus(map) {
         self.map.setView([user.lat, user.lng], self.map.getZoom());
       }
 
-      // send out a message with the updated location
+      // broadcast out our location update
       self.sendMsg(self.locationUpdateMsg());
     }
   };
@@ -262,7 +329,7 @@ function Locus(map) {
     conn = new WebSocket(wsURL);
 
     conn.onopen = function(evl) {
-      self.sendMsg(self.locationUpdateMsg());
+      self.sendSyncMsgs();
     }
 
     conn.onclose = function(evl) {

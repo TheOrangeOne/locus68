@@ -94,11 +94,10 @@ func (g *Guest) writeSocket() {
 			}
 			w.Write(message)
 
-			// add queued messages to the current websocket message
-			n := len(g.send)
-			for i := 0; i < n; i++ {
-				w.Write(<-g.send)
-			}
+			// n := len(g.send)
+			// for i := 0; i < n; i++ {
+			// 	w.Write(<-g.send)
+			// }
 
 			if err := w.Close(); err != nil {
 				return
