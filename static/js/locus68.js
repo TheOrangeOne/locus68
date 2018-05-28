@@ -149,8 +149,20 @@ function Locus() {
 
   // attempt to restore data from browser storage
   this.restore = function() {
+    var roomName;
+
+    // TODO: also check some timestamp
+    // check that the data persisted is for this room
+    // TODO: maybe index persistence by room (in case of multiple rooms)
+    roomName = localStorage.getItem('room');
+    if (roomName !== self.room) {
+      localStorage.removeItem('user');
+      localStorage.removeItem('users');
+    }
+
     self.restoreThisUser();
     self.restoreUsers();
+    localStorage.setItem('room', self.room);
   };
 
   this.persistor = function() {
@@ -329,8 +341,10 @@ function Locus() {
         icon: icon
       }).addTo(self.group);
       user.marker.on('click', self.userMarkerClick);
-    } else {
+    } else if (user.lat && user.lng) {
       user.marker.setLatLng([user.lat, user.lng]);
+    } else {
+      console.warn('attempted to update position with null coords');
     }
   };
 
@@ -338,7 +352,9 @@ function Locus() {
     var map = self.map;
 
     // remove the marker from the map
-    map.removeLayer(user.marker);
+    if (user.marker) {
+      map.removeLayer(user.marker);
+    }
 
     // set the fields in the user
     user.img = img;
@@ -469,6 +485,7 @@ function Locus() {
     var conn;
     var baseURL;
     var wsURL;
+    var wsProtocol;
     var room = self.room;
     var id   = self.user.id;
 
@@ -477,7 +494,9 @@ function Locus() {
       console.error('websockets not supported by this browser');
     }
 
-    baseURL = 'ws://' + document.location.host + '/ws/';
+    wsProtocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+
+    baseURL = wsProtocol + '//' + document.location.host + '/ws/';
     wsURL = baseURL + room + '?id=' + id;
 
     conn = new WebSocket(wsURL);
