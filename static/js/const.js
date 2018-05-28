@@ -5,6 +5,9 @@ var ICON_SIZE = 42; // '0.5em';
 // the interval in which to persist to localStorage (milliseconds)
 var PERSIST_INTERVAL = 5000;
 
+// number of seconds in which to keep what is stored in localStorage
+var CACHE_LIFETIME = 300;
+
 // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#Ready_state_constants
 var WS_STATE = {
   CONNECTING: 0,

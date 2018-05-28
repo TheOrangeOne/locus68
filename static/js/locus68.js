@@ -34,6 +34,11 @@ function Locus() {
     return user;
   };
 
+  this.makeUsers = function() {
+    var users = {};
+    return users;
+  };
+
   this.initUser = function() {
     var user = self.user;
 
@@ -65,11 +70,11 @@ function Locus() {
 
   // deserialize a persisted user
   this.deserializeUser = function(serUser) {
-    var user;
+    var user = self.makeUser();
     try {
       user = JSON.parse(serUser);
     } catch (err) {
-      user = self.makeUser();
+      console.warn('deserializing user failed');
     }
 
     return user;
@@ -77,7 +82,6 @@ function Locus() {
 
   // serialize the users
   this.serializeUsers = function(users) {
-    var user;
     var serUsers = {};
     for (userId in users) {
       serUsers[userId] = self.serializeUser(users[userId]);
@@ -87,14 +91,14 @@ function Locus() {
   };
 
   this.deserializeUsers = function(serUsers) {
-    var users = {};
+    var users = self.makeUsers();
     try {
       var us = JSON.parse(serUsers);
       for (userid in us) {
-        users[userid] = JSON.parse(us[userid]);
+        users[userid] = self.deserializeUser(us[userid]);
       }
     } catch (err) {
-      users = {};
+      console.warn('deserializing users failed');
     }
 
     return users;
@@ -106,63 +110,47 @@ function Locus() {
     localStorage.setItem('user', serUser);
   };
 
-  // restore the specific user from localStorage
-  // if restoring fails for some reason, then just make a new user
-  this.restoreThisUser = function() {
-    var user;
-
-    var serUser = localStorage.getItem('user');
-    if (serUser) {
-      user = self.deserializeUser(serUser);
-    } else {
-      user = self.makeUser();
-    }
-
-    self.user = user;
-  };
-
   this.persistUsers = function() {
     var serUsers = self.serializeUsers(self.users);
     localStorage.setItem('users', serUsers);
   };
 
-  this.restoreUsers = function() {
-    var users;
-
-    var serUsers = localStorage.getItem('users');
-    if (serUsers) {
-      users = self.deserializeUsers(serUsers);
-    }
-    else {
-      users = {};
-    }
-
-    self.users = users;
-  };
-
   // persist all relevant state to localStorage to allow seamless
   // rejoining
   this.persist = function() {
-    self.persistThisUser();
-    self.persistUsers();
+    var state = {
+      'user': self.serializeUser(self.user),
+      'users': self.serializeUsers(self.users),
+      'ts': Date.now(),
+    };
+
+    var serState = JSON.stringify(state);
+    localStorage.setItem(self.room, serState);
   }
 
   // attempt to restore data from browser storage
   this.restore = function() {
-    var roomName;
+    var room;
 
-    // TODO: also check some timestamp
-    // check that the data persisted is for this room
-    // TODO: maybe index persistence by room (in case of multiple rooms)
-    roomName = localStorage.getItem('room');
-    if (roomName !== self.room) {
-      localStorage.removeItem('user');
-      localStorage.removeItem('users');
+    room = localStorage.getItem(self.room);
+    if (!room) {
+      return;
     }
 
-    self.restoreThisUser();
-    self.restoreUsers();
-    localStorage.setItem('room', self.room);
+    room = JSON.parse(room);
+    if (!('ts' in room)) {
+      console.warn('corrupted save data');
+      return;
+    }
+
+    var tdelta = (Date.now() - room.ts) / 1000;
+    if (tdelta > CACHE_LIFETIME) {
+      localStorage.removeItem(room);
+      return;
+    }
+
+    self.user = self.deserializeUser(room['user']);
+    self.users = self.deserializeUsers(room['users']);
   };
 
   this.persistor = function() {
@@ -249,7 +237,8 @@ function Locus() {
 
     // finally, render the user feed
     self.render({
-      userMarker: true
+      userMarker: true,
+      userMarkers: true
     });
   };
 
@@ -521,10 +510,13 @@ function Locus() {
     var pathname = window.location.pathname;
     self.room = pathname.substr(3, pathname.length);
 
-    // attempt to restore from localStorage
+    self.user = self.makeUser();
+    self.users = self.makeUsers();
+
+    // attempt to restore state from localStorage
     self.restore();
 
-    // initialize the user from saved state or generate new
+    // initialize the user
     self.initUser();
 
     // initialize the location stuff
