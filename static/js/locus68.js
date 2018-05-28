@@ -35,12 +35,7 @@ function Locus() {
   };
 
   this.initUser = function() {
-    // attempt to restore
-    self.restore();
-
     var user = self.user;
-
-    console.log('restored user', user);
 
     var id = Math.random()
       .toString(36)
@@ -73,12 +68,42 @@ function Locus() {
     var user;
     try {
       user = JSON.parse(serUser);
-    }
-    catch (err) {
+    } catch (err) {
       user = self.makeUser();
     }
 
     return user;
+  };
+
+  // serialize the users
+  this.serializeUsers = function(users) {
+    var user;
+    var serUsers = {};
+    for (userId in users) {
+      serUsers[userId] = self.serializeUser(users[userId]);
+    }
+
+    return JSON.stringify(serUsers);
+  };
+
+  this.deserializeUsers = function(serUsers) {
+    var users = {};
+    try {
+      var us = JSON.parse(serUsers);
+      for (userid in us) {
+        users[userid] = JSON.parse(us[userid]);
+      }
+    } catch (err) {
+      users = {};
+    }
+
+    return users;
+  };
+
+  // persist the specific user to localStorage
+  this.persistThisUser = function() {
+    var serUser = self.serializeUser(self.user);
+    localStorage.setItem('user', serUser);
   };
 
   // restore the specific user from localStorage
@@ -86,9 +111,8 @@ function Locus() {
   this.restoreThisUser = function() {
     var user;
 
-    if (window.localStorage.user) {
-      var serUser = localStorage.getItem('user');
-      console.log('localStorage user', serUser);
+    var serUser = localStorage.getItem('user');
+    if (serUser) {
       user = self.deserializeUser(serUser);
     } else {
       user = self.makeUser();
@@ -97,24 +121,37 @@ function Locus() {
     self.user = user;
   };
 
-  // persist the specific user to localStorage
-  this.persistThisUser = function() {
-    var serUser = self.serializeUser(self.user);
-    console.log('persisting user', serUser);
-    localStorage.setItem('user', serUser);
+  this.persistUsers = function() {
+    var serUsers = self.serializeUsers(self.users);
+    localStorage.setItem('users', serUsers);
   };
 
-  // try to restore data from browser storage
-  this.restore = function() {
-    self.restoreThisUser();
-  };
+  this.restoreUsers = function() {
+    var users;
 
+    var serUsers = localStorage.getItem('users');
+    if (serUsers) {
+      users = self.deserializeUsers(serUsers);
+    }
+    else {
+      users = {};
+    }
+
+    self.users = users;
+  };
 
   // persist all relevant state to localStorage to allow seamless
   // rejoining
   this.persist = function() {
     self.persistThisUser();
+    self.persistUsers();
   }
+
+  // attempt to restore data from browser storage
+  this.restore = function() {
+    self.restoreThisUser();
+    self.restoreUsers();
+  };
 
   this.persistor = function() {
     self.persist();
@@ -162,6 +199,24 @@ function Locus() {
     };
   };
 
+  // render state
+  this.render = function(opts) {
+    if (opts.userMarker) {
+      self.updateUserMarker(self.user);
+    }
+    if (opts.userMarkers) {
+      for (userid in self.users) {
+        self.updateUserMarker(self.users[userid]);
+      }
+    }
+    if (opts.userFeed) {
+      LocusUI.renderUserFeed(self.users, self.focusOther);
+    }
+    if (opts.userGroup) {
+      LocusUI.renderUserGroup(self);
+    }
+  };
+
   // handle a location update for a user
   this.handleUserLocationUpdate = function(userId, data) {
     var user;
@@ -180,12 +235,10 @@ function Locus() {
 
     user = users[userId];
 
-    // update the user's marker
-    self.updateUserMarker(user);
-
     // finally, render the user feed
-    LocusUI.renderUserFeed(users, self.focusOther);
-    LocusUI.renderUserGroup(self);
+    self.render({
+      userMarker: true
+    });
   };
 
   this.handleUserAvatarUpdate = function(userId, data) {
@@ -199,9 +252,10 @@ function Locus() {
 
     self.updateUserAvatar(user, data.img);
 
-    // update the user feed
-    LocusUI.renderUserFeed(users, self.focusOther);
-    LocusUI.renderUserGroup(self);
+    self.render({
+      userFeed: true,
+      userGroup: true
+    });
   };
 
   this.msgHandlers = {
@@ -448,6 +502,9 @@ function Locus() {
     var pathname = window.location.pathname;
     self.room = pathname.substr(3, pathname.length);
 
+    // attempt to restore from localStorage
+    self.restore();
+
     // initialize the user from saved state or generate new
     self.initUser();
 
@@ -462,6 +519,14 @@ function Locus() {
 
     // initialize the persistance logic
     self.initPersistor();
+
+    // render whatever stuff we have
+    self.render({
+      userMarker: true,
+      userMarkers: true,
+      userFeed: true,
+      userGroup: true
+    });
   };
 
   this.init();
