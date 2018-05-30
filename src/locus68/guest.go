@@ -61,7 +61,6 @@ func (g *Guest) readSocket() {
 			break
 		}
 
-		log.Printf("%s sent %s", g.id, message)
 		g.room.broadcast <- message
 	}
 }

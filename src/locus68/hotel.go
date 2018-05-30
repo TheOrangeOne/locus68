@@ -47,7 +47,6 @@ func (h *Hotel) createRoom() (*Room, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("rand URL %v", roomName)
 	room := h.prepareRoom(roomName)
 	return room, nil
 }

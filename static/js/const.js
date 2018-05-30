@@ -6,7 +6,10 @@ var ICON_SIZE = 42; // '0.5em';
 var PERSIST_INTERVAL = 5000;
 
 // number of seconds in which to keep what is stored in localStorage
-var CACHE_LIFETIME = 300;
+var CACHE_LIFETIME = 600;
+
+// the time in which to auto rejoin the user if they land on the index page
+var AUTO_REJOIN = 300;
 
 // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#Ready_state_constants
 var WS_STATE = {

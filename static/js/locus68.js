@@ -104,24 +104,14 @@ function Locus() {
     return users;
   };
 
-  // persist the specific user to localStorage
-  this.persistThisUser = function() {
-    var serUser = self.serializeUser(self.user);
-    localStorage.setItem('user', serUser);
-  };
-
-  this.persistUsers = function() {
-    var serUsers = self.serializeUsers(self.users);
-    localStorage.setItem('users', serUsers);
-  };
-
   // persist all relevant state to localStorage to allow seamless
   // rejoining
   this.persist = function() {
     var state = {
-      'user': self.serializeUser(self.user),
-      'users': self.serializeUsers(self.users),
-      'ts': Date.now(),
+      user: self.serializeUser(self.user),
+      users: self.serializeUsers(self.users),
+      ts: Date.now(),
+      cleanExit: false
     };
 
     var serState = JSON.stringify(state);
