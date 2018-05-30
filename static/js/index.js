@@ -14,9 +14,12 @@ rooms.sort(function(a, b) {
   return b.ts - a.ts;
 });
 
+var iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+
 // TODO: improve this
 // rejoin the most recent room if there wasn't a clean exit
-if (rooms.length > 0 && !rooms[0].cleanExit && (Date.now()-rooms[0].ts)/1000 < AUTO_REJOIN) {
+// this should only apply to iOS
+if (iOS && rooms.length > 0 && !rooms[0].cleanExit && (Date.now()-rooms[0].ts)/1000 < AUTO_REJOIN) {
   var url = '/r/' + rooms[0].name;
   window.location.href = url;
 }
