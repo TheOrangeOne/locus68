@@ -11,29 +11,40 @@ import (
 var addr = flag.String("addr", ":8080", "http service address")
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
+	log.Println("wtf")
 	if r.URL.Path != "/" {
 		http.Error(w, "Not found", http.StatusNotFound)
 		return
 	}
+
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
+
 	http.ServeFile(w, r, "static/home.html")
 }
 
-func serveCreate(w http.ResponseWriter, r *http.Request) {
-	log.Println("create: %v", r.URL.String)
-	if r.Method != "GET" {
+func serveCreate(w http.ResponseWriter, r *http.Request, hotel *Hotel) {
+	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	roomName := "j2kj323j32hjhlhj23l"
+
+	room, err := hotel.createRoom()
+	if err != nil {
+		log.Println("create failed!")
+		http.Redirect(w, r, "/todo", 301)
+		return
+	}
+
+	roomName := room.name
 	http.Redirect(w, r, fmt.Sprintf("/r/%v", roomName), 301)
 }
 
-func RoomHandler(w http.ResponseWriter, r *http.Request) {
+func RoomHandler(w http.ResponseWriter, r *http.Request, hotel *Hotel) {
+	// TODO
+	// if hotel.hasRoom() {}
 	http.ServeFile(w, r, "static/map.html")
 }
 
@@ -47,7 +58,9 @@ func main() {
 	hotel := newHotel()
 
 	r.HandleFunc("/", serveHome).Methods("GET")
-	r.HandleFunc("/create", serveCreate).Methods("GET")
+	r.HandleFunc("/create", func(w http.ResponseWriter, r *http.Request) {
+		serveCreate(w, r, hotel)
+	}).Methods("POST")
 	r.HandleFunc("/r/{room}", RoomHandler).Methods("GET")
 	r.HandleFunc("/t/{room}", TestRoomHandler).Methods("GET")
 	r.HandleFunc("/ws/{room}", hotel.serveHotel)

@@ -6,6 +6,8 @@ import (
 	"net/http"
 )
 
+const URL_LEN = 16
+
 type Hotel struct {
 	rooms map[string]*Room
 }
@@ -36,6 +38,18 @@ func (h *Hotel) prepareRoom(roomName string) *Room {
 	h.rooms[roomName] = room
 	go h.reservation(room)
 	return room
+}
+
+// Generate a cryptographically random URL to use for the room name
+// along with the room.
+func (h *Hotel) createRoom() (*Room, error) {
+	roomName, err := GenRandString(URL_LEN)
+	if err != nil {
+		return nil, err
+	}
+	log.Printf("rand URL %v", roomName)
+	room := h.prepareRoom(roomName)
+	return room, nil
 }
 
 func (h *Hotel) reservation(room *Room) {
