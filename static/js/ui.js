@@ -1,8 +1,19 @@
 var LocusUI = {
-  renderUserFeed: function(users, focusOther) {
+  renderUserFeed: function(locus) {
+    var users = locus.users;
     var el_title = document.createElement('h1');
     el_title.id = 'title';
-    el_title.innerHTML = window.location.pathname;
+
+    // TODO: temporary hack to get back to index on app
+    var elBack = document.createElement('a');
+    elBack.innerHTML = '🏠 ‖ ';
+    elBack.onclick = function() { locus.nav('/'); };
+    el_title.appendChild(elBack);
+
+    var elTitle = document.createElement('span');
+    elTitle.innerHTML = window.location.pathname;
+    el_title.appendChild(elTitle);
+
     var el_span = document.createElement('span');
     el_span.className += "right";
 
@@ -13,7 +24,7 @@ var LocusUI = {
       el_user.setAttribute('src', user.img);
 
       el_user.onclick = function() {
-        focusOther(id);
+        locus.focusOther(id);
       };
 
       el_span.appendChild(el_user);

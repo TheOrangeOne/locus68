@@ -4,9 +4,18 @@ var rooms = [];
 var i;
 for (i = 0; i < localStorage.length; ++i) {
   var roomName = localStorage.key(i);
-  var room = JSON.parse(localStorage.getItem(roomName));
-  room.name = roomName;
-  rooms.push(room);
+  var room;
+
+  try {
+    room = JSON.parse(localStorage.getItem(roomName));
+  } catch (err) {
+    console.warn('failed to parse room');
+  }
+
+  if (room) {
+    room.name = roomName;
+    rooms.push(room);
+  }
 }
 
 // sort rooms descending

@@ -106,12 +106,12 @@ function Locus() {
 
   // persist all relevant state to localStorage to allow seamless
   // rejoining
-  this.persist = function() {
+  this.persist = function(cleanExit) {
     var state = {
       user: self.serializeUser(self.user),
       users: self.serializeUsers(self.users),
       ts: Date.now(),
-      cleanExit: false
+      cleanExit: cleanExit
     };
 
     var serState = JSON.stringify(state);
@@ -144,9 +144,9 @@ function Locus() {
   };
 
   this.persistor = function() {
-    self.persist();
+    self.persist(false);
     setTimeout(self.persistor, PERSIST_INTERVAL);
-  }
+  };
 
   // initialize a persistor
   this.initPersistor = function() {
@@ -200,7 +200,7 @@ function Locus() {
       }
     }
     if (opts.userFeed) {
-      LocusUI.renderUserFeed(self.users, self.focusOther);
+      LocusUI.renderUserFeed(self);
     }
     if (opts.userGroup) {
       LocusUI.renderUserGroup(self);
@@ -494,6 +494,12 @@ function Locus() {
 
     // set the connection
     self.conn = conn;
+  };
+
+  this.nav = function() {
+    // persist with a clean exit
+    this.persist(true);
+    window.location.href = '/';
   };
 
   this.init = function() {
