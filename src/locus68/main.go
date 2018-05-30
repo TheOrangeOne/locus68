@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
@@ -22,6 +23,16 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "static/home.html")
 }
 
+func serveCreate(w http.ResponseWriter, r *http.Request) {
+	log.Println("create: %v", r.URL.String)
+	if r.Method != "GET" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	roomName := "j2kj323j32hjhlhj23l"
+	http.Redirect(w, r, fmt.Sprintf("/r/%v", roomName), 301)
+}
+
 func RoomHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "static/map.html")
 }
@@ -36,6 +47,7 @@ func main() {
 	hotel := newHotel()
 
 	r.HandleFunc("/", serveHome).Methods("GET")
+	r.HandleFunc("/create", serveCreate).Methods("GET")
 	r.HandleFunc("/r/{room}", RoomHandler).Methods("GET")
 	r.HandleFunc("/t/{room}", TestRoomHandler).Methods("GET")
 	r.HandleFunc("/ws/{room}", hotel.serveHotel)
