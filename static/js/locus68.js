@@ -15,11 +15,13 @@ function Locus() {
 
   // map stuff
   this.FOCUS_ZOOM_LEVEL = 18;
-  this.elLock;   // the lower left icon
+  this.elUserLock;   // the user lock control
+  this.elGroupLock;  // the group lock control
+  this.melGroupLock;  // the group lock control (map parent)
   this.zooming = false;  // zoom in progress
-  this.follow = true;   // have the map track the movement
+  this.userLock = false;   // track the movement
+  this.groupLock = true;   // track the movement of the group
   this.group;            // leaflet featureGroup
-  this.elGroup; // the upper left control
 
   // location stuff
   this.firstLocationUpdate = true; // used to set the zoom initially
@@ -228,11 +230,19 @@ function Locus() {
 
     user = users[userId];
 
+
     // finally, render the user feed
     self.render({
       userMarker: true,
       userMarkers: true
     });
+
+    // if set to follow the group then adjust the map view accordingly
+    // note: this has to come after the render because it is dependent
+    // on the markers being added to the map
+    if (self.groupLock && !self.zooming) {
+      self.focusGroup();
+    }
   };
 
   this.handleUserAvatarUpdate = function(userId, data) {
@@ -365,13 +375,17 @@ function Locus() {
 
       if (self.firstLocationUpdate) {
         self.focusGroup();
-        // self.map.setView([user.lat, user.lng], self.FOCUS_ZOOM_LEVEL);
         self.firstLocationUpdate = false;
       }
 
       // if set to follow the user then adjust the map view accordingly
-      if (self.follow && !self.zooming) {
+      if (self.userLock && !self.zooming) {
         self.map.setView([user.lat, user.lng], self.map.getZoom());
+      }
+
+      // if set to follow the group then adjust the map view accordingly
+      if (self.groupLock && !self.zooming) {
+        self.focusGroup();
       }
 
       // broadcast out our location update
@@ -379,23 +393,63 @@ function Locus() {
     }
   };
 
-  this.toggleFollowMovement = function() {
+  this.toggleUserLockOn = function() {
     var user = self.user;
-    self.follow = !self.follow;
-    self.elLock.setAttribute('src', user.img);
-    if (self.follow) {
-      self.elLock.classList.remove('untracked');
-      self.map.setView([user.lat, user.lng], self.FOCUS_ZOOM_LEVEL);
+    self.userLock = true;
+    self.elUserLock.classList.add('untracked');
+    self.elUserLock.classList.remove('untracked');
+    self.map.setView([user.lat, user.lng], self.FOCUS_ZOOM_LEVEL);
+  };
+
+  this.toggleUserLockOff = function() {
+    var user = self.user;
+    self.userLock = false;
+    self.elUserLock.classList.add('untracked');
+  };
+
+  this.toggleUserLock = function() {
+    var user = self.user;
+    self.elUserLock.setAttribute('src', user.img);
+    if (self.userLock) {
+      self.toggleUserLockOff();
     } else {
-      self.elLock.classList.add('untracked');
+      self.toggleUserLockOn();
+    }
+
+    // toggle off the user lock if it's on
+    if (self.groupLock) {
+      self.toggleGroupLockOff();
+    }
+  };
+
+  this.toggleGroupLockOff = function() {
+    self.groupLock = false;
+    self.elGroupLock.classList.add('untracked');
+  };
+
+  this.toggleGroupLockOn = function() {
+    self.groupLock = true;
+    self.elGroupLock.classList.remove('untracked');
+    self.focusGroup();
+  };
+
+  this.toggleGroupLock = function() {
+    var user = self.user;
+
+    if (self.groupLock) {
+      self.toggleGroupLockOff();
+    } else {
+      self.toggleGroupLockOn();
+    }
+
+    // toggle off the user lock if it's on
+    if (self.userLock) {
+      self.toggleUserLockOff();
     }
   };
 
   this.focusGroup = function() {
     self.map.fitBounds(self.group.getBounds().pad(0.5));
-    if (self.follow) {
-      self.toggleFollowMovement();
-    }
   };
 
   this.focusUser = function(user) {
@@ -410,8 +464,12 @@ function Locus() {
       //duration: 5
     });
 
-    if (self.follow) {
-      self.toggleFollowMovement();
+    // disable any locks
+    if (self.userLock) {
+      self.toggleUserLockOff();
+    }
+    if (self.groupLock) {
+      self.toggleGroupLockOff();
     }
   };
 
@@ -423,9 +481,6 @@ function Locus() {
       attribution: '<a href="http://osm.org/copyright">OSM</a>'
     }).addTo(map);
 
-    // the lock button in the lower left
-    var elLock = null;
-
     map.on('zoomstart', function() {
       self.zooming = true;
     });
@@ -435,8 +490,12 @@ function Locus() {
     });
 
     map.on('dragstart', function(e) {
-      if (self.follow) {
-        self.toggleFollowMovement();
+      if (self.userLock) {
+        self.toggleUserLockOff();
+      }
+
+      if (self.groupLock) {
+        self.toggleGroupLockOff();
       }
     });
 
@@ -455,8 +514,8 @@ function Locus() {
       onAdd: function(map) {
         var el = L.DomUtil.create('img', 'img-circle tracker untracked');
         el.setAttribute('src', self.user.img);
-        el.onclick = self.toggleFollowMovement;
-        self.elLock = el;
+        el.onclick = self.toggleUserLock;
+        self.elUserLock = el;
         return el;
       }
     });

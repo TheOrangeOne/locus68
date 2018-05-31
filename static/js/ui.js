@@ -44,8 +44,8 @@ var LocusUI = {
     var users = locus.users;
 
     // remove the previous control if it exists
-    if (locus.elGroup) {
-      map.removeControl(locus.elGroup);
+    if (locus.melGroupLock) {
+      map.removeControl(locus.melGroupLock);
     }
 
     var groupControl = L.Control.extend({
@@ -72,12 +72,13 @@ var LocusUI = {
           el.setAttribute('src', u.img);
         }
 
-        list.onclick = locus.focusGroup;
+        locus.elGroupLock = list;
+        list.onclick = locus.toggleGroupLock;
         return list;
       }
     });
 
-    locus.elGroup = new groupControl();
-    map.addControl(locus.elGroup);
+    locus.melGroupLock = new groupControl();
+    map.addControl(locus.melGroupLock);
   }
 };
