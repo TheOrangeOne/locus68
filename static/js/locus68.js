@@ -17,9 +17,12 @@ function Locus() {
   this.FOCUS_ZOOM_LEVEL = 18;
   this.elLock;   // the lower left icon
   this.zooming = false;  // zoom in progress
-  this.follow = false;   // have the map track the movement
+  this.follow = true;   // have the map track the movement
   this.group;            // leaflet featureGroup
   this.elGroup; // the upper left control
+
+  // location stuff
+  this.firstLocationUpdate = true; // used to set the zoom initially
 
 
   this.makeUser = function() {
@@ -360,6 +363,12 @@ function Locus() {
       // update the user's marker on the map
       self.updateUserMarker(user);
 
+      if (self.firstLocationUpdate) {
+        self.focusGroup();
+        // self.map.setView([user.lat, user.lng], self.FOCUS_ZOOM_LEVEL);
+        self.firstLocationUpdate = false;
+      }
+
       // if set to follow the user then adjust the map view accordingly
       if (self.follow && !self.zooming) {
         self.map.setView([user.lat, user.lng], self.map.getZoom());
@@ -539,7 +548,7 @@ function Locus() {
   this.init();
 }
 
-
+var locus;
 window.onload = function() {
-  var locus = new Locus();
+  locus = new Locus();
 }
