@@ -33,3 +33,9 @@ function makeMapIcon(size, img) {
   });
 };
 
+function cryptoHash(s) {
+  var md = forge.md.sha512.create();
+  md.update(s);
+  return md.digest();
+};
+

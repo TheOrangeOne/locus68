@@ -37,6 +37,7 @@ func main() {
 
 	r.HandleFunc("/", serveHome).Methods("GET")
 	r.HandleFunc("/r/{room}", RoomHandler).Methods("GET")
+	r.HandleFunc("/x", RoomHandler).Methods("GET")
 	r.HandleFunc("/t/{room}", TestRoomHandler).Methods("GET")
 	r.HandleFunc("/ws/{room}", hotel.serveHotel)
 	http.Handle("/", r)

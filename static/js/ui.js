@@ -1,8 +1,8 @@
 var LocusUI = {
-  renderUserFeed: function(users, focusOther) {
+  renderUserFeed: function(roomBox, users, focusOther) {
     var el_title = document.createElement('h1');
     el_title.id = 'title';
-    el_title.innerHTML = window.location.pathname;
+    el_title.appendChild(roomBox);
     var el_span = document.createElement('span');
     el_span.className += "right";
 
