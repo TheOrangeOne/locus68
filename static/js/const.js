@@ -11,6 +11,8 @@ var CACHE_LIFETIME = 600;
 // the time in which to auto rejoin the user if they land on the index page
 var AUTO_REJOIN = 300;
 
+var UPDATE_INTERVAL = 10000;
+
 // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#Ready_state_constants
 var WS_STATE = {
   CONNECTING: 0,

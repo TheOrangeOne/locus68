@@ -148,14 +148,24 @@ function Locus() {
     self.users = self.deserializeUsers(room['users']);
   };
 
-  this.persistor = function() {
+  this.persister = function() {
     self.persist(false);
-    setTimeout(self.persistor, PERSIST_INTERVAL);
+    setTimeout(self.persister, PERSIST_INTERVAL);
   };
 
   // initialize a persistor
-  this.initPersistor = function() {
-    this.persistor();
+  this.initPersister = function() {
+    this.persister();
+  };
+
+  // periodically send out a location update
+  this.updater = function() {
+    self.sendMsg(self.locationUpdateMsg());
+    setTimeout(self.updater, UPDATE_INTERVAL);
+  };
+
+  this.initUpdater = function() {
+    this.updater();
   };
 
   // encrypt, sign and finally send a message
@@ -230,7 +240,6 @@ function Locus() {
 
     user = users[userId];
 
-
     // finally, render the user feed
     self.render({
       userMarker: true,
@@ -268,6 +277,7 @@ function Locus() {
   };
 
   this.handleMsg = function(msg) {
+    console.log('got message', msg);
     if (msg.type in self.msgHandlers) {
       // shortcut if the message if from us
       if (msg.user === self.user.id)
@@ -593,7 +603,10 @@ function Locus() {
     self.initSocket();
 
     // initialize the persistance logic
-    self.initPersistor();
+    self.initPersister();
+
+    // initialize the updater
+    // self.initUpdater();
 
     // render whatever stuff we have
     self.render({
