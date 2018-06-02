@@ -308,10 +308,8 @@ function Locus(roomName, pass) {
     });
   };
 
-  this.msgHandlers = {
-    [MSG_TYPE.LOCATION_UPDATE]: this.handleUserLocationUpdate,
-    [MSG_TYPE.AVATAR_UPDATE]: this.handleUserAvatarUpdate
-  };
+  this.msgHandlers[MSG_TYPE.LOCATION_UPDATE] = this.handleUserLocationUpdate;
+  this.msgHandlers[MSG_TYPE.AVATAR_UPDATE] = this.handleUserAvatarUpdate;
 
   this.handleMsg = function(msg) {
     console.log('got message', msg);
