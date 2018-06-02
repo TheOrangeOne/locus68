@@ -6,7 +6,7 @@ var LocusUI = {
 
     // TODO: temporary hack to get back to index on app
     var elBack = document.createElement('a');
-    elBack.innerHTML = '🏠 ‖ ';
+    elBack.innerHTML = '🏠 ';
     elBack.onclick = function() { locus.nav('/'); };
     el_title.appendChild(elBack);
 
@@ -31,11 +31,11 @@ var LocusUI = {
     }
 
     el_title.appendChild(el_span);
-    while (el_users.firstChild) {
-      el_users.removeChild(el_users.lastChild);
+    while (elUsers.firstChild) {
+      elUsers.removeChild(elUsers.lastChild);
     }
 
-    el_users.appendChild(el_title);
+    elUsers.appendChild(el_title);
   },
 
   renderUserGroup: function(locus) {

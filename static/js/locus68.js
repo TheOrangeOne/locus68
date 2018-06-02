@@ -1,6 +1,6 @@
 // TODO: user, map, location can probably be abstracted out
 //       this would be a premature optimization atm
-function Locus(roomName, pass) {
+function Locus(roomName, pass, initPos) {
   // thx javascript
   var self = this;
 
@@ -308,6 +308,7 @@ function Locus(roomName, pass) {
     });
   };
 
+  this.msgHandlers = {};
   this.msgHandlers[MSG_TYPE.LOCATION_UPDATE] = this.handleUserLocationUpdate;
   this.msgHandlers[MSG_TYPE.AVATAR_UPDATE] = this.handleUserAvatarUpdate;
 
@@ -404,6 +405,11 @@ function Locus(roomName, pass) {
   this.sendSyncMsgs = function() {
     self.sendMsg(self.locationUpdateMsg());
     self.sendMsg(self.avatarUpdateMsg());
+  };
+
+  this.initLocation = function(pos) {
+    setWatchLocation(self.handleLocationUpdate);
+    self.handleLocationUpdate(pos);
   };
 
   this.handleLocationUpdate = function(position) {
@@ -637,11 +643,11 @@ function Locus(roomName, pass) {
     // initialize the user
     self.initUser();
 
-    // initialize the location stuff
-    initLocation(self.handleLocationUpdate);
-
     // initialize the map
     self.initMap();
+
+    // initialize the location handler and location data
+    self.initLocation(initPos);
 
     // initialize the socket connection
     self.initSocket();
@@ -663,24 +669,3 @@ function Locus(roomName, pass) {
 
   this.init();
 }
-
-var locus;
-window.onload = function() {
-  var pathname = window.location.pathname;
-
-  if (pathname.substr(0, 3) === '/r/') {
-    var room;
-    room = pathname.substr(3, pathname.length);
-    locus = Locus(room, '');
-  } else if (pathname === '/x' || pathname === '/x/') {
-    document.getElementById('overlay').style.display = 'block';
-  }
-}
-
-document.getElementById('keyform').onsubmit = function() {
-  var pass = document.getElementById('roomkey').value;
-  document.getElementById('overlay').style.display = 'none';
-  locus = Locus('', pass);
-  return false;
-};
-

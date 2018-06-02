@@ -55,9 +55,9 @@
             </form>
           </div>
           <div class="pure-control-group">
-            <form action="/createsec" method="post">
-              <btn-full text="🔒 create secure room"></btn-full>
-            </form>
+            <btn-full v-on:click.native="window.location.href='/x'"
+              v-bind:text="'🔒 create secure room'">
+            </btn-full>
           </div>
         </fieldset>
       </div>
