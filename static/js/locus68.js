@@ -26,7 +26,6 @@ function Locus(roomName, pass, initPos) {
   // location stuff
   this.firstLocationUpdate = true; // used to set the zoom initially
 
-  this.encrypted = false;
   this.room;
   this.key;
 
@@ -171,52 +170,56 @@ function Locus(roomName, pass, initPos) {
     this.updater();
   };
 
+  this.encryptMsg = function(payload) {
+    var cipher = forge.cipher.createCipher('AES-GCM', self.key);
+    var iv = forge.random.getBytesSync(16);
+    // console.log("encrypting payload " + payload + " with key " + forge.util.bytesToHex(self.key) + " using iv " + forge.util.bytesToHex(iv));
+    cipher.start({iv: iv});
+    cipher.update(forge.util.createBuffer(payload));
+    cipher.finish();
+    payload = JSON.stringify({
+      'iv': iv,
+      'ct': cipher.output.bytes(),
+      'tag': cipher.mode.tag.bytes()
+    });
+    return payload;
+  };
+
+  this.decryptMsg = function(msg) {
+    console.assert('iv' in msg);
+    console.assert('ct' in msg);
+    console.assert('tag' in msg);
+    // console.log("got ciphertext " + forge.util.bytesToHex(msg.ct) + " with iv " + forge.util.bytesToHex(msg.iv) + " and gcm tag " + forge.util.bytesToHex(msg.tag));
+    var decipher = forge.cipher.createDecipher('AES-GCM', self.key);
+    decipher.start({iv: msg.iv, tag: forge.util.createBuffer(msg.tag)});
+    decipher.update(forge.util.createBuffer(msg.ct));
+    if (!decipher.finish()) {
+      console.error("bad gcm tag! (possible tampering)");
+      msg = {};
+    } else {
+      msg = JSON.parse(decipher.output.bytes());
+      // console.log("decrypted via key " + forge.util.bytesToHex(self.key) + " and got msg " + JSON.stringify(msg));
+    }
+    return msg;
+  };
+
   // encrypt, sign and finally send a message
   this.sendMsg = function(msg) {
-    // TODO: encrypt, sign
+    // TODO: sign
     var conn = self.conn;
     if (conn && conn.readyState == WS_STATE.OPEN) {
-      payload = JSON.stringify(msg);
+      var payload = JSON.stringify(msg);
+      payload = self.encryptMsg(payload);
 
-      if (self.encrypted) {
-        var cipher = forge.cipher.createCipher('AES-GCM', self.key);
-        var iv = forge.random.getBytesSync(16);
-        console.log("encrypting payload " + payload + " with key " + forge.util.bytesToHex(self.key) + " using iv " + forge.util.bytesToHex(iv));
-        cipher.start({iv: iv});
-        cipher.update(forge.util.createBuffer(payload));
-        cipher.finish();
-        payload = JSON.stringify({
-          'iv': iv,
-          'ct': cipher.output.bytes(),
-          'tag': cipher.mode.tag.bytes()
-        });
-        console.log("sending encrypted payload " + payload);
-      }
-
+      // console.log("sending encrypted payload " + payload);
       conn.send(payload);
     }
   };
 
   this.recvMsg = function(data) {
-    // TODO: verify, decrypt
+    // TODO: verify
     var msg = JSON.parse(data);
-
-    if(self.encrypted) {
-      console.assert('iv' in msg);
-      console.assert('ct' in msg);
-      console.assert('tag' in msg);
-      console.log("got ciphertext " + forge.util.bytesToHex(msg.ct) + " with iv " + forge.util.bytesToHex(msg.iv) + " and gcm tag " + forge.util.bytesToHex(msg.tag));
-      var decipher = forge.cipher.createDecipher('AES-GCM', self.key);
-      decipher.start({iv: msg.iv, tag: forge.util.createBuffer(msg.tag)});
-      decipher.update(forge.util.createBuffer(msg.ct));
-      if (!decipher.finish()) {
-        console.error("bad gcm tag! (possible tampering)");
-        msg = {};
-      } else {
-        msg = JSON.parse(decipher.output.bytes());
-        console.log("decrypted via key " + forge.util.bytesToHex(self.key) + " and got msg " + JSON.stringify(msg));
-      }
-    }
+    msg = self.decryptMsg(msg);
 
     // TODO: proper verification and handling
     console.assert('user' in msg);
@@ -313,7 +316,6 @@ function Locus(roomName, pass, initPos) {
   this.msgHandlers[MSG_TYPE.AVATAR_UPDATE] = this.handleUserAvatarUpdate;
 
   this.handleMsg = function(msg) {
-    console.log('got message', msg);
     if (msg.type in self.msgHandlers) {
       // shortcut if the message if from us
       if (msg.user === self.user.id)
@@ -630,6 +632,7 @@ function Locus(roomName, pass, initPos) {
   this.init = function() {
     if (roomName) {
       self.room = roomName;
+      self.initKeyField(roomName); // temporarily use room name
     } else if (pass) {
       self.encrypted = true;
       self.initKeyField(pass);
@@ -646,17 +649,8 @@ function Locus(roomName, pass, initPos) {
     // initialize the map
     self.initMap();
 
-    // initialize the location handler and location data
-    self.initLocation(initPos);
-
     // initialize the socket connection
     self.initSocket();
-
-    // initialize the persistance logic
-    self.initPersister();
-
-    // initialize the updater
-    self.initUpdater();
 
     // render whatever stuff we have
     self.render({
@@ -665,6 +659,15 @@ function Locus(roomName, pass, initPos) {
       userFeed: true,
       userGroup: true
     });
+
+    // initialize the location handler and location data
+    self.initLocation(initPos);
+
+    // initialize the persistance logic
+    self.initPersister();
+
+    // initialize the updater
+    self.initUpdater();
   };
 
   this.init();
