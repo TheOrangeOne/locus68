@@ -1,6 +1,6 @@
 // TODO: user, map, location can probably be abstracted out
 //       this would be a premature optimization atm
-function Locus() {
+function Locus(roomName, pass) {
   // thx javascript
   var self = this;
 
@@ -26,6 +26,9 @@ function Locus() {
   // location stuff
   this.firstLocationUpdate = true; // used to set the zoom initially
 
+  this.encrypted = false;
+  this.room;
+  this.key;
 
   this.makeUser = function() {
     var user = {
@@ -173,13 +176,47 @@ function Locus() {
     // TODO: encrypt, sign
     var conn = self.conn;
     if (conn && conn.readyState == WS_STATE.OPEN) {
-      conn.send(JSON.stringify(msg));
+      payload = JSON.stringify(msg);
+
+      if (self.encrypted) {
+        var cipher = forge.cipher.createCipher('AES-GCM', self.key);
+        var iv = forge.random.getBytesSync(16);
+        console.log("encrypting payload " + payload + " with key " + forge.util.bytesToHex(self.key) + " using iv " + forge.util.bytesToHex(iv));
+        cipher.start({iv: iv});
+        cipher.update(forge.util.createBuffer(payload));
+        cipher.finish();
+        payload = JSON.stringify({
+          'iv': iv,
+          'ct': cipher.output.bytes(),
+          'tag': cipher.mode.tag.bytes()
+        });
+        console.log("sending encrypted payload " + payload);
+      }
+
+      conn.send(payload);
     }
   };
 
   this.recvMsg = function(data) {
     // TODO: verify, decrypt
     var msg = JSON.parse(data);
+
+    if(self.encrypted) {
+      console.assert('iv' in msg);
+      console.assert('ct' in msg);
+      console.assert('tag' in msg);
+      console.log("got ciphertext " + forge.util.bytesToHex(msg.ct) + " with iv " + forge.util.bytesToHex(msg.iv) + " and gcm tag " + forge.util.bytesToHex(msg.tag));
+      var decipher = forge.cipher.createDecipher('AES-GCM', self.key);
+      decipher.start({iv: msg.iv, tag: forge.util.createBuffer(msg.tag)});
+      decipher.update(forge.util.createBuffer(msg.ct));
+      if (!decipher.finish()) {
+        console.error("bad gcm tag! (possible tampering)");
+        msg = {};
+      } else {
+        msg = JSON.parse(decipher.output.bytes());
+        console.log("decrypted via key " + forge.util.bytesToHex(self.key) + " and got msg " + JSON.stringify(msg));
+      }
+    }
 
     // TODO: proper verification and handling
     console.assert('user' in msg);
@@ -580,10 +617,19 @@ function Locus() {
     window.location.href = '/';
   };
 
-  this.init = function() {
-    var pathname = window.location.pathname;
-    self.room = pathname.substr(3, pathname.length);
+  this.initKeyField = function(pass) {
+    self.key = forge.pkcs5.pbkdf2(pass, 'nacl', 10000, 16);
+    self.room = cryptoHash(self.key).toHex();
+    console.log('new key ' + forge.util.bytesToHex(self.key) + ' and room ' + self.room);
+  };
 
+  this.init = function() {
+    if (roomName) {
+      self.room = roomName;
+    } else if (pass) {
+      self.encrypted = true;
+      self.initKeyField(pass);
+    }
     self.user = self.makeUser();
     self.users = self.makeUsers();
 
@@ -606,7 +652,7 @@ function Locus() {
     self.initPersister();
 
     // initialize the updater
-    // self.initUpdater();
+    self.initUpdater();
 
     // render whatever stuff we have
     self.render({
@@ -622,5 +668,21 @@ function Locus() {
 
 var locus;
 window.onload = function() {
-  locus = new Locus();
+  var pathname = window.location.pathname;
+
+  if (pathname.substr(0, 3) === '/r/') {
+    var room;
+    room = pathname.substr(3, pathname.length);
+    locus = Locus(room, '');
+  } else if (pathname === '/x' || pathname === '/x/') {
+    document.getElementById('overlay').style.display = 'block';
+  }
 }
+
+document.getElementById('keyform').onsubmit = function() {
+  var pass = document.getElementById('roomkey').value;
+  document.getElementById('overlay').style.display = 'none';
+  locus = Locus('', pass);
+  return false;
+};
+

@@ -60,10 +60,16 @@ func main() {
 	r.HandleFunc("/create", func(w http.ResponseWriter, r *http.Request) {
 		serveCreate(w, r, hotel)
 	}).Methods("POST")
+
+	// normal room handler
 	r.HandleFunc("/r/{room}", func(w http.ResponseWriter, r *http.Request) {
 		roomHandler(w, r, hotel)
 	}).Methods("GET")
-	// r.HandleFunc("/r/{room}", RoomHandler).Methods("GET")
+
+	// "secure" rooms
+	r.HandleFunc("/x", func(w http.ResponseWriter, r *http.Request) {
+		roomHandler(w, r, hotel)
+	}).Methods("GET")
 	r.HandleFunc("/t/{room}", TestRoomHandler).Methods("GET")
 	r.HandleFunc("/ws/{room}", hotel.serveHotel)
 	http.Handle("/", r)
