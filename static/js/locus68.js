@@ -536,6 +536,9 @@ function Locus(roomName, pass, initPos) {
 
     map.on('zoomstart', function() {
       self.zooming = true;
+      if (self.groupLock) {
+        self.toggleGroupLockOff();
+      }
     });
 
     map.on('zoomend', function() {
