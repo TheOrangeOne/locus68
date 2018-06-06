@@ -7,7 +7,7 @@ var LocusUI = {
     // TODO: temporary hack to get back to index on app
     var elBack = document.createElement('a');
     elBack.innerHTML = '🏠 ';
-    elBack.className += 'home';
+    elBack.className += 'clickable';
     elBack.onclick = function() { locus.nav('/'); };
     elTitle.appendChild(elBack);
 
@@ -77,6 +77,7 @@ var LocusUI = {
 
         locus.elGroupLock = list;
         list.onclick = locus.toggleGroupLock;
+        list.className += 'clickable';
         return list;
       }
     });
@@ -85,3 +86,6 @@ var LocusUI = {
     map.addControl(locus.melGroupLock);
   }
 };
+
+
+// map controls

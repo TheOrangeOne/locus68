@@ -513,7 +513,6 @@ function Locus(roomName, pass, initPos) {
 
   this.focusOther = function(otherid) {
     var other = self.users[otherid];
-    console.log(otherid);
     self.map.flyTo([other.lat, other.lng], self.FOCUS_ZOOM_LEVEL, {
       //duration: 5
     });
@@ -527,10 +526,20 @@ function Locus(roomName, pass, initPos) {
     }
   };
 
+  this.showSettings = function() {
+    if (elSettingsOverlay.style.display === 'none') {
+      elSettingsOverlay.style.display = 'block';
+    }
+    else {
+      elSettingsOverlay.style.display = 'none';
+    }
+  };
+
   this.initMap = function() {
     var map = L.map('map', {
       zoomControl: false
     }).setView([46.423, -100.3248], 3);
+
     L.tileLayer('https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '<a href="http://osm.org/copyright">OSM</a>'
     }).addTo(map);
@@ -566,7 +575,7 @@ function Locus(roomName, pass, initPos) {
         position: 'bottomleft'
       },
       onAdd: function(map) {
-        var el = L.DomUtil.create('img', 'img-circle tracker untracked');
+        var el = L.DomUtil.create('img', 'img-circle tracker untracked clickable');
         el.setAttribute('src', self.user.img);
         el.onclick = self.toggleUserLock;
         self.elUserLock = el;
@@ -575,9 +584,25 @@ function Locus(roomName, pass, initPos) {
     });
     map.addControl(new lockControl());
 
+    var settingsControl = L.Control.extend({
+      options: {
+        position: 'topright'
+      },
+      onAdd: function(map) {
+        var el = L.DomUtil.create('span', 'settings-button clickable');
+        el.innerHTML = '⚙';
+        el.onclick = self.showSettings;
+        self.elUserLock = el;
+        return el;
+      }
+    });
+    map.addControl(new settingsControl());
+
+    // disable double clicking
+    map.doubleClickZoom.disable();
+
     // create a group for the markers
     var group = new L.FeatureGroup().addTo(map);
-
     self.group = group;
     self.map = map;
   };

@@ -35,3 +35,9 @@ var MSG_TYPE = {
   USER_DISCONNECT: 'userdc',  // user disconnected
   AVATAR_UPDATE: 'ava'        // avatar update for a user
 };
+
+var NUM_AVATARS = 26;
+var AVATARS = [];
+for (var i = 1; i < NUM_AVATARS + 1; ++i) {
+  AVATARS.push(i);
+}

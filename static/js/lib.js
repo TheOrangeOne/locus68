@@ -39,3 +39,7 @@ function cryptoHash(s) {
   return md.digest();
 };
 
+
+function getAvatarURL(num) {
+  return '/static/img/rand/' + num + '.png';
+};

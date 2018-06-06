@@ -34,8 +34,6 @@ h1, h2 {
   flex: 1 1 auto;
 }
 
-#map {}
-
 .box .row.footer {
   margin-top: 0.25em;
   margin-left: 0.2em;
@@ -52,6 +50,19 @@ h1, h2 {
   width: 1.7em;
   height: 1.7em;
   cursor: pointer;
+}
+
+/* settings avatars */
+.setting-avatar {
+  width: 2.5em;
+  height: 2.5em;
+  cursor: pointer;
+}
+
+.avatar-container {
+  height: 2.5em;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 .tracker {
@@ -188,6 +199,23 @@ https://purecss.io/grids/
   z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
 }
 
+/* overlay with user configurable settings */
+#settingsOverlay {
+  position: fixed; /* Sit on top of the page content */
+  /*display: none;*/ /* Hidden by default */
+  display: block; /* Hidden by default */
+  width: 70%; /* Full width (cover the whole page) */
+  height: 70%; /* Full height (cover the whole page) */
+  top: 0;
+  bottom: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgb(253,246,227, 0.85);
+  z-index: 100000; /* Specify a stack order in case you're using a different order for other elements */
+}
+
 #locFailText {
   position: relative;
   top: 40%;
@@ -196,3 +224,14 @@ https://purecss.io/grids/
   margin-top: 30px;
   font-size: 2em;
 }
+
+.clickable {
+  cursor: pointer;
+}
+
+.settings-button {
+  font-size: 2.2em;
+  font-color: gray;
+  font-weight: bold;
+}
+
