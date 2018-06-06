@@ -1,41 +1,44 @@
 var LocusUI = {
   renderUserFeed: function(locus) {
     var users = locus.users;
-    var el_title = document.createElement('h1');
-    el_title.id = 'title';
+    var elTitle = document.createElement('h1');
+    elTitle.id = 'title';
 
     // TODO: temporary hack to get back to index on app
     var elBack = document.createElement('a');
     elBack.innerHTML = '🏠 ';
+    elBack.className += 'home';
     elBack.onclick = function() { locus.nav('/'); };
-    el_title.appendChild(elBack);
+    elTitle.appendChild(elBack);
 
-    var elTitle = document.createElement('span');
-    elTitle.innerHTML = window.location.pathname;
-    el_title.appendChild(elTitle);
+    var elPath = document.createElement('span');
+    elPath.innerHTML = window.location.pathname;
+    elTitle.appendChild(elPath);
 
-    var el_span = document.createElement('span');
-    el_span.className += "right";
+    var elSpan = document.createElement('span');
+    elSpan.className += 'right';
 
-    for (id in users) {
+    for (var id in users) {
       var user = users[id];
-      var el_user = document.createElement('img');
-      el_user.className += 'img-circle pps';
-      el_user.setAttribute('src', user.img);
+      var elUser = document.createElement('img');
+      elUser.className += 'img-circle pps';
+      elUser.setAttribute('src', user.img);
 
-      el_user.onclick = function() {
-        locus.focusOther(id);
-      };
+      elUser.onclick = function(id) {
+        return function() {
+          locus.focusOther(id);
+        };
+      }(id);
 
-      el_span.appendChild(el_user);
+      elSpan.appendChild(elUser);
     }
 
-    el_title.appendChild(el_span);
+    elTitle.appendChild(elSpan);
     while (elUsers.firstChild) {
       elUsers.removeChild(elUsers.lastChild);
     }
 
-    elUsers.appendChild(el_title);
+    elUsers.appendChild(elTitle);
   },
 
   renderUserGroup: function(locus) {

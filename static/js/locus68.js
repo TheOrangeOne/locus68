@@ -513,6 +513,7 @@ function Locus(roomName, pass, initPos) {
 
   this.focusOther = function(otherid) {
     var other = self.users[otherid];
+    console.log(otherid);
     self.map.flyTo([other.lat, other.lng], self.FOCUS_ZOOM_LEVEL, {
       //duration: 5
     });
@@ -536,9 +537,6 @@ function Locus(roomName, pass, initPos) {
 
     map.on('zoomstart', function() {
       self.zooming = true;
-      if (self.groupLock) {
-        self.toggleGroupLockOff();
-      }
     });
 
     map.on('zoomend', function() {
