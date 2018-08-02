@@ -592,7 +592,7 @@ function Locus(roomName, pass, initPos) {
         var el = L.DomUtil.create('span', 'settings-button clickable');
         el.innerHTML = '⚙';
         el.onclick = self.showSettings;
-        self.elUserLock = el;
+        self.elSettings = el;
         return el;
       }
     });
