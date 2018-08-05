@@ -34,8 +34,8 @@ function Configuration() {
    * }
    */
   this.MSG_TYPE = {
-    LOCATION_UPDATE: 'locu',    // location update for a user
-    USER_DISCONNECT: 'userdc',  // user disconnected
+    USER_UPDATE: 'userup',    // general update for a user
+    USER_DISCONNECT: 'userdc'  // user disconnected
   };
 
   var self = this;

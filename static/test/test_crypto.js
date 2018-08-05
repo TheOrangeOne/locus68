@@ -1,19 +1,18 @@
 var assert = require('assert');
-// var crypto = require('crypto');
-var Crypto = require('../js/crypto.js');
+var Crypt = require('../js/crypto.js');
 
 
-describe('Crypto', function() {
+describe('Crypt', function() {
   describe('Crypto()', function() {
     it('should initialize properly', function() {
-      var crypto = new Crypto();
+      var crypto = new Crypt();
       assert(crypto);
     });
   });
 
   var crypto;
   beforeEach(function() {
-    crypto = new Crypto('mypass');
+    crypto = new Crypt('mypass');
   });
 
   describe('encrypt()', function() {
@@ -28,9 +27,9 @@ describe('Crypto', function() {
   describe('decrypt()', function() {
     it('should decrypt data successfully', function() {
       var msg = 'mymessage';
-      // var ct = crypto.encrypt(msg);
-      // var pt = crypto.decrypt(msg);
-      // assert.equal(msg, pt);
+      var ct = crypto.encrypt(msg);
+      var pt = crypto.decrypt(ct);
+      assert.equal(msg, pt);
     });
   });
 });

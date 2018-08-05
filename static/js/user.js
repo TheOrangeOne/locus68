@@ -71,19 +71,9 @@ function User(opts) {
     var id = Math.random()
       .toString(36)
       .replace(/[^a-z]+/g, '')
-      .substr(0, 5);
+      .substr(0, 6);
 
     return id;
-  };
-
-  this.init = function() {
-    self.id = self.id || this.genId();
-    self.lat = self.lat || null;
-    self.lng = self.lng || null;
-    self.img = self.img || Config.getRandomAvatar();
-    self.ts = self.ts || null;
-    self.tsls = self.tsls || null;
-    self.marker = self.marker || null;
   };
 
   // update the update timestamp
@@ -156,6 +146,16 @@ function User(opts) {
     //   user = new User();
     // }
     // return user;
+  };
+
+  this.init = function() {
+    self.id = self.id || this.genId();
+    self.lat = self.lat || null;
+    self.lng = self.lng || null;
+    self.img = self.img || Config.getRandomAvatar();
+    self.ts = self.ts || null;
+    self.tsls = self.tsls || null;
+    self.marker = self.marker || null;
   };
 
   this.init();

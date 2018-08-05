@@ -39,51 +39,6 @@ var LocusUI = {
     }
 
     elUsers.appendChild(elTitle);
-  },
-
-  renderUserGroup: function(locus) {
-    var map = locus.map;
-    var user = locus.user;
-    var users = locus.users;
-
-    // remove the previous control if it exists
-    if (locus.melGroupLock) {
-      map.removeControl(locus.melGroupLock);
-    }
-
-    var groupControl = L.Control.extend({
-      options: {
-        position: 'topleft'
-      },
-      onAdd: function(map) {
-        var list = L.DomUtil.create('div', '');
-        list.setAttribute('id', 'group');
-
-        var el = L.DomUtil.create('img', 'group-item', list);
-        el.setAttribute('style', 'transform: rotate(270deg) translate(0px, 0px) rotate(-270deg);');
-        el.setAttribute('src', user.img);
-
-        var i = 0;
-        var nusers = Object.keys(users).length
-        for (userid in users) {
-          var u = users[userid];
-          var offsetAngle = 360 / nusers;
-          var rotateAngle = offsetAngle * i++;
-
-          var el = L.DomUtil.create('img', 'group-item', list);
-          el.setAttribute('style', 'transform: rotate(' + rotateAngle + 'deg) translate(0px, -20px) rotate(-' + rotateAngle + 'deg);');
-          el.setAttribute('src', u.img);
-        }
-
-        locus.elGroupLock = list;
-        list.onclick = locus.toggleGroupLock;
-        list.className += 'clickable';
-        return list;
-      }
-    });
-
-    locus.melGroupLock = new groupControl();
-    map.addControl(locus.melGroupLock);
   }
 };
 

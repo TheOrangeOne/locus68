@@ -6,6 +6,7 @@ function Map(opts) {
   this.elMap = opts.elMap || 'map';
   this.tileURL = opts.tileURL || Map.DEFAULT_TILE_URL;
   this.user = opts.user || null;
+  this.otherUsers = opts.otherUsers || null;
 
   this.zooming = false;  // zoom in progress
   this.userLock = false;  // track the movement
@@ -33,22 +34,7 @@ function Map(opts) {
   };
 
   this.addUserLock = function() {
-    // create the follow-lock control
-    var lockControl = L.Control.extend({
-      options: {
-        position: 'bottomleft'
-      },
-      onAdd: function(map) {
-        var el = L.DomUtil.create('img', 'img-circle tracker untracked clickable');
-        el.id = 'user-lock';
-        el.setAttribute('v-bind:src', 'user.img');
-        el.onclick = self.toggleUserLock;
-        self.elUserLock = el;
-        return el;
-      }
-    });
-    self.map.addControl(new lockControl());
-    window.lock = new Vue({
+    self.userLockVue = new Vue({
       el: '#user-lock',
       data: {
         user: self.user
@@ -57,6 +43,18 @@ function Map(opts) {
   };
 
   this.addGroupLock = function() {
+    self.userGroupLock = new Vue({
+      el: '#group-lock',
+      data: {
+        user: self.user,
+        users: self.otherUsers.list,
+        getStyle: function(i) {
+          var offsetAngle = 360 / this.users.length;
+          var rotateAngle = offsetAngle * i;
+          return 'transform: rotate(' + rotateAngle + 'deg) translate(0px, -20px) rotate(-' + rotateAngle + 'deg);';
+        }
+      }
+    });
   };
 
   this.init = function() {
@@ -76,6 +74,7 @@ function Map(opts) {
 
     // add map components
     self.addUserLock();
+    self.addGroupLock();
 
     // create a group for the markers
     var group = new L.FeatureGroup().addTo(self.map);

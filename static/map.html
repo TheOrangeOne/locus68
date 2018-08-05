@@ -44,18 +44,43 @@
   </div>
   <div class="box">
     <div class="row header">
-      <div>
-        roomname
+      <div v-cloak id="room-name">
+        {{ roomname }}
       </div>
     </div>
     <div id="map" class="row content">
       <div id="tool-bar">
+        <div>
+          <img
+            id="user-lock"
+            class="img-circle tracker untracked clickable"
+            v-bind:src="user.img"
+          >
+          </img>
+        </div>
+        <div id="group-lock">
+          <img
+            v-cloak
+            class="group-item clickable"
+            style="transform: rotate(270deg) translate(0px, 0px) rotate(-270deg);"
+            v-bind:src="user.img"
+          >
+          </img>
+          <img
+            v-cloak
+            v-for="(user, i) in users"
+            class="group-item"
+            v-bind:style="getStyle(i)"
+            v-bind:src="user.img"
+          >
+          </img>
+        </div>
         <div id="other-users">
           <img
-          v-for="user in users"
-          class="setting-avatar"
-          v-bind:src="user.img"
-          v-on:click="test"
+            v-for="user in users"
+            class="setting-avatar"
+            v-bind:src="user.img"
+            v-on:click="test"
           >
           </img>
         </div>
@@ -77,6 +102,9 @@
     <script src="/static/js/users.js"></script>
     <script src="/static/js/loc.js"></script>
     <script src="/static/js/ui.js"></script>
+    <script src="/static/js/socket.js"></script>
+    <script src="/static/js/msg.js"></script>
+    <script src="/static/js/crypto.js"></script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/locus.js"></script>
     <script src="/static/js/map_init.js"></script>

@@ -2,9 +2,9 @@ if (typeof window === 'undefined') {
   var forge = require('./forge.min.js');
 }
 
-function Crypto(opts) {
+function Crypt(opts) {
   opts = opts || {};
-  this.pass = opts.pass || 'todothisshouldberandom';
+  this.pass = opts.pass || 'todothisshouldberandomandnotthis';
 
   var self = this;
 
@@ -16,51 +16,53 @@ function Crypto(opts) {
     });
     cipher.update(forge.util.createBuffer(data));
     cipher.finish();
-    data = JSON.stringify({
+    var ct = {
       'iv': iv,
       'ct': cipher.output.bytes(),
       'tag': cipher.mode.tag.bytes()
-    });
-    return data;
+    };
+    return ct;
   };
 
-  this.decrypt = function(data) {
-    var d = forge.cipher.createDecipher('AES-GCM', self.key);
-    d.start({
-      iv: data.iv,
-      tag: forge.util.createBuffer(data.tag)
+  this.decrypt = function(edata) {
+    var dec = forge.cipher.createDecipher('AES-GCM', self.key);
+    dec.start({
+      iv: edata.iv,
+      tag: forge.util.createBuffer(edata.tag)
     });
-    d.update(forge.util.createBuffer(data.ct));
+    dec.update(forge.util.createBuffer(edata.ct));
 
-    if (!d.finish()) {
+    var data;
+    if (!dec.finish()) {
       console.error("bad gcm tag! (possible tampering)");
       data = null;
     } else {
-      data = d.output.bytes();
-      // console.log("decrypted via key " + forge.util.bytesToHex(self.key) + " and got msg " + JSON.stringify(msg));
+      data = dec.output.bytes();
     }
     return data;
   };
 
-  this.hash = function(s) {
-    var md = forge.md.sha512.create();
-    md.update(s);
-    return md.digest();
-  };
-
-  this.init = function() {
-    self.key = forge.pkcs5.pbkdf2(self.pass, 'nacl', 10000, 16);
-  };
 
   this.toHex = function(data) {
     return forge.util.bytesToHex(data);
   };
 
+  this.init = function() {
+    if (self.pass) {
+      self.key = forge.pkcs5.pbkdf2(self.pass, 'nacl', 10000, 16);
+    }
+  };
 
   this.init();
 };
 
+Crypt.hash = function(s) {
+  var md = forge.md.sha512.create();
+  md.update(s);
+  return md.digest();
+};
+
 
 if (typeof window === 'undefined') {
-  module.exports = Crypto;
+  module.exports = Crypt;
 }

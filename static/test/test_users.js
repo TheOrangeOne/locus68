@@ -33,6 +33,7 @@ describe('Users', function() {
 
         var gotuser = users.getUser(user.id);
         assert.equal(user, gotuser);
+        assert.equal(users.list.length, 1);
       });
     });
 
@@ -44,6 +45,7 @@ describe('Users', function() {
         users.removeUser(user.id);
         var u = users.getUser(user.id);
         assert.equal(u, null);
+        assert.equal(users.list.length, 0);
       });
     });
 

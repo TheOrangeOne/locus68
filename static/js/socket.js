@@ -1,11 +1,10 @@
-
 /**
  * Socket wraps websocket
  */
 function Socket(opts) {
   opts = opts || {};
 
-  this.protocol = opts.protocol || 'wss';
+  this.proto = opts.proto || 'wss';
   this.url = opts.url || null;
   this.onopen = opts.onopen || function(evt) {
     console.log('socket opened');
@@ -21,14 +20,17 @@ function Socket(opts) {
   var self = this;
 
   this.send = function(msg) {
-    var payload;
     if (!self.conn) {
       return false;
     }
-    if (!conn.readyState === Socket.WS_STATE.OPEN) {
-      return false;
-    }
-    self.conn.send(payload);
+    // if (conn.readyState !== Socket.WS_STATE.OPEN) {
+    //   return false;
+    // }
+    self.conn.send(msg);
+  };
+
+  this.getURL = function() {
+    return self.proto + '://' + self.url;
   };
 
   this.init = function() {
@@ -37,7 +39,7 @@ function Socket(opts) {
       console.error('browser does not support websockets');
       return false;
     }
-    conn = new WebSocket(self.url);
+    conn = new WebSocket(self.getURL());
 
     conn.onopen = self.onopen;
     conn.onclose = self.onclose;
@@ -46,6 +48,8 @@ function Socket(opts) {
     // set the connection
     self.conn = conn;
   };
+
+  this.init();
 };
 
 // https://developer.mozilla.org/en-US/docs/Web/API/WebSocket#Ready_state_constants

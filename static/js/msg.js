@@ -1,6 +1,6 @@
 if (typeof window === 'undefined') {
-  Config = require('./conf.js');
-  Lib = require('./lib.js');
+  var Crypt = require('./crypto.js'),
+    Socket = require('./socket.js')
 }
 
 /**
@@ -9,15 +9,48 @@ if (typeof window === 'undefined') {
  */
 function Msgr(opts) {
   opts = opts || {};
-  this.socket = opts.socket || null;
-  this.crypto = opts.crypto || null;
+  this.url = opts.url || null;
+  this.proto = opts.proto || null;
+  this.pass = opts.pass || null;
+  this.onMsg = opts.onMsg || function() {};
+  this.onopen = opts.onopen || null;
+  this.onclose = opts.onclose || null;
+
+  this.Socket = opts.socket || Socket;
+  this.Crypt = opts.crypto || Crypt;
+
   var self = this;
 
   // sends a msg that is JSON.stringify-able
   this.sendMsg = function(msg) {
-    msg = self.crypto.encrypt(msg);
-    this.socket.send();
+    var smsg = JSON.stringify(msg);
+    var cmsg = self.crypto.encrypt(smsg);
+    cmsg = JSON.stringify(cmsg);
+    self.socket.send(cmsg);
   };
+
+  this.onmessage = function(evt) {
+    var data = evt.data;
+    var ct = JSON.parse(data);
+    var msg = self.crypto.decrypt(ct);
+    self.onMsg(msg);
+  };
+
+  this.init = function() {
+    self.socket = new self.Socket({
+      proto: self.proto,
+      url: self.url,
+      onmessage: self.onmessage,
+      onopen: self.onopen,
+      onclose: self.onclose
+    });
+
+    self.crypto = new self.Crypt({
+      pass: self.pass
+    });
+  };
+
+  this.init();
 };
 
 if (typeof window === 'undefined') {

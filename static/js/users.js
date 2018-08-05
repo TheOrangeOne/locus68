@@ -11,7 +11,20 @@ function Users(opts) {
 
   this.users = {};
 
+  // vuejs doesn't support reactive changes to objects so
+  // we have to maintain a list of the users as well
+  this.list = [];
+
+
   var self = this;
+
+  // syncs the list and obj references
+  this._sync = function() {
+    var i, v;
+    for (i = 0; i < list.length; ++i) {
+      v = list[i];
+    }
+  };
 
   // returns if a user is stored
   this.hasUser = function(userId) {
@@ -37,10 +50,15 @@ function Users(opts) {
     }
 
     self.users[user.id] = user;
+    self.list.push(user);
   };
 
   this.removeUser = function(userId) {
     if (self.hasUser(userId)) {
+      var user = self.getUser(userId);
+      var index = self.list.indexOf(user);
+      if (index !== -1)
+        self.list.splice(index, 1);
       delete self.users[userId];
     }
     else {

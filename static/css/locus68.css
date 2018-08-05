@@ -4,6 +4,10 @@ html, body {
   background-color: #fdf6e3;
 }
 
+[v-cloak] {
+  display: none;
+}
+
 /* stolen from SO:
 http://stackoverflow.com/questions/90178/make-a-div-fill-the-height-of-the-remaining-screen-space
 */
@@ -66,8 +70,8 @@ h1, h2 {
 }
 
 .tracker {
-  width: 4em;
-  height: 4em;
+  width: 3.5em;
+  height: 3.5em;
   border-color: gray;
   border-width: 0.15em;
   border-style: solid;
@@ -134,10 +138,12 @@ https://purecss.io/grids/
   text-align: left;
 }
 
-#group {
+#group-lock {
 	background-color: #fdf6e3;
 	height: 60px;
 	width: 60px;
+	/*height: 3.5em;
+	width: 3.5em;*/
 	border-radius: 50%;
 	position: relative;
   border-color: gray;
@@ -149,6 +155,9 @@ https://purecss.io/grids/
 	list-style: none;
 	height: 20px;
 	width: 20px;
+/*
+	height: 1.1em;
+	width: 1.1em;*/
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -289,7 +298,7 @@ https://purecss.io/grids/
 }
 
 #tool-bar {
-  height: 3.5em;
+  /*height: 3.5em;*/
   z-index: 1001; /* magic number to play with leaflet */
   position: absolute;
   width: 100%;
@@ -307,3 +316,4 @@ https://purecss.io/grids/
   left: 60%;
   top: 30%;
 }
+
