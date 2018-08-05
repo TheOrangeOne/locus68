@@ -151,7 +151,7 @@ https://purecss.io/grids/
   border-style: solid;
 }
 
-.group-item{
+.group-item {
 	list-style: none;
 	height: 20px;
 	width: 20px;
@@ -179,11 +179,24 @@ https://purecss.io/grids/
   z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
 }
 
-#keyForm {
+#room-key {
   position: relative;
-  top: 40%;
-  width: 100%;
   text-align: center;
+  width: 100%;
+}
+
+#initOverlay {
+  text-align: center;
+  position: fixed; /* Sit on top of the page content */
+  display: block; /* Hidden by default */
+  width: 100%; /* Full width (cover the whole page) */
+  height: 100%; /* Full height (cover the whole page) */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
+  z-index: 402;
 }
 
 #roomKey {
@@ -192,20 +205,6 @@ https://purecss.io/grids/
   text-align: center;
   margin-top: 30px;
   height: 2em;
-}
-
-/* overlay notifying the user to enable location settings */
-#locOverlay {
-  position: fixed; /* Sit on top of the page content */
-  display: none; /* Hidden by default */
-  width: 100%; /* Full width (cover the whole page) */
-  height: 100%; /* Full height (cover the whole page) */
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
-  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
 }
 
 /* overlay with user configurable settings */
@@ -299,7 +298,7 @@ https://purecss.io/grids/
 
 #tool-bar {
   /*height: 3.5em;*/
-  z-index: 1001; /* magic number to play with leaflet */
+  z-index: 401; /* magic number to play with leaflet */
   position: absolute;
   width: 100%;
   bottom: 0;
@@ -317,3 +316,15 @@ https://purecss.io/grids/
   top: 30%;
 }
 
+.log-error {
+  color: red;
+}
+.log-warn {
+  color: yellow;
+}
+.log-info {
+  color: white;
+}
+
+.log-enter-active, .log-leave-active { transition: opacity .5s; }
+.log-enter, .log-leave-to { opacity: 0; }

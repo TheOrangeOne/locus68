@@ -42,11 +42,6 @@ function Crypt(opts) {
     return data;
   };
 
-
-  this.toHex = function(data) {
-    return forge.util.bytesToHex(data);
-  };
-
   this.init = function() {
     if (self.pass) {
       self.key = forge.pkcs5.pbkdf2(self.pass, 'nacl', 10000, 16);
@@ -60,6 +55,10 @@ Crypt.hash = function(s) {
   var md = forge.md.sha512.create();
   md.update(s);
   return md.digest();
+};
+
+Crypt.toHex = function(data) {
+  return forge.util.bytesToHex(data);
 };
 
 

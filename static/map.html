@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="white">
     <link rel="manifest" href="/static/manifest.json">
     <link rel="apple-touch-icon" href="/static/img/logo500.png">
-    <title>locus68</title>
+    <title>locus</title>
     <script src="/static/js/leaflet.js"></script>
     <link rel=icon href="/static/img/logo192.png"/>
     <link rel="stylesheet" href="/static/css/leaflet.css"/>
@@ -19,15 +19,38 @@
     <script src="/static/js/forge.min.js" type="text/javascript"></script>
   </head>
   <body>
-    <div id="locOverlay">
-      <h1 id="locFailText">
-        failed to access location - check your location settings!
-      </h1>
-    </div>
-    <div id="keyOverlay">
-      <form id="keyForm">
-        <input type="text" placeholder="room key" id="roomKey" size="32"/>
-      </form>
+    <div id="initOverlay" v-bind:style="{
+      display: opts.initializing ? 'block' : 'none'
+    }">
+      <transition-group name="log" tag="p">
+        <p v-for="event in opts.log" v-bind:key="event.msg" v-bind:class="{
+        'log-error': event.type === 'error',
+        'log-warn': event.type === 'warn',
+        'log-info': event.type === 'info'
+        }">
+          <template v-if="event.type === 'error'">
+            {{ "error: " + event.msg }}
+          </template>
+          <template v-if="event.type === 'warn'">
+            {{ "warning: " + event.msg }}
+          </template>
+          <template v-if="event.type === 'info'">
+            {{ event.msg }}
+          </template>
+        </p>
+      </transition-group>
+      <input
+        v-cloak 
+        id="room-key"
+        type="text"
+        placeholder="room key"
+        size="32"
+        v-bind:style="{
+          visibility: opts.roomKeyVisible ? 'visible' : 'hidden'
+        }"
+        @keyup.enter="opts.roomKeySubmit"
+        :disabled="!opts.roomKeyEnabled"
+      />
     </div>
     <div id="settingsOverlay">
       <div id="settings" class="pure-g">
@@ -52,15 +75,15 @@
       <div id="tool-bar">
         <div>
           <img
+            v-cloak
             id="user-lock"
             class="img-circle tracker untracked clickable"
             v-bind:src="user.img"
           >
           </img>
         </div>
-        <div id="group-lock">
+        <div v-cloak id="group-lock">
           <img
-            v-cloak
             class="group-item clickable"
             style="transform: rotate(270deg) translate(0px, 0px) rotate(-270deg);"
             v-bind:src="user.img"
@@ -77,6 +100,7 @@
         </div>
         <div id="other-users">
           <img
+            v-cloak
             v-for="user in users"
             class="setting-avatar"
             v-bind:src="user.img"
@@ -87,27 +111,25 @@
       </div>
     </div>
   </div>
-    <script>
-      var elLocOverlay = document.getElementById('locOverlay');
-      var elKeyForm = document.getElementById('keyForm');
-      var elKeyOverlay = document.getElementById('keyOverlay');
-      var elSettingsOverlay = document.getElementById('settingsOverlay');
-      var elRoomKey = document.getElementById('roomKey');
-      var elUsers = document.getElementById('users');
-    </script>
-    <script src="/static/js/components.js"></script>
     <script src="/static/js/lib.js"></script>
     <script src="/static/js/conf.js"></script>
     <script src="/static/js/user.js"></script>
     <script src="/static/js/users.js"></script>
     <script src="/static/js/loc.js"></script>
-    <script src="/static/js/ui.js"></script>
     <script src="/static/js/socket.js"></script>
     <script src="/static/js/msg.js"></script>
     <script src="/static/js/crypto.js"></script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/locus.js"></script>
-    <script src="/static/js/map_init.js"></script>
     <script src="/static/js/map_settings.js"></script>
+    <script>
+      var locus;
+      window.onload = function() {
+        locus = Locus.init({
+          host: document.location.host,
+          path: window.location.pathname
+        });
+      };
+    </script>
   </body>
 </html>
