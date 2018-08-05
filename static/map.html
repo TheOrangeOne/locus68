@@ -39,7 +39,7 @@
             v-for="av in avatars"
             class="setting-avatar"
             v-on:click="changeAvatar(av)"
-            v-bind:src="getAvatarURL(av)"
+            v-bind:src="Config.getAvatarURL(av)"
             >
             </img>
           </div>
@@ -65,11 +65,12 @@
     <script src="/static/js/components.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/node-forge@0.7.0/dist/forge.min.js" type="text/javascript"></script>
     <script src="/static/js/lib.js"></script>
-    <script src="/static/js/const.js"></script>
+    <script src="/static/js/conf.js"></script>
+    <script src="/static/js/user.js"></script>
     <script src="/static/js/loc.js"></script>
     <script src="/static/js/ui.js"></script>
     <script src="/static/js/locus68.js"></script>
-    <script src="/static/js/map.js"></script>
+    <script src="/static/js/map_init.js"></script>
     <script src="/static/js/map_settings.js"></script>
   </body>
 </html>

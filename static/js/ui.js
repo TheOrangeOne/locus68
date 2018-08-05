@@ -12,7 +12,7 @@ var LocusUI = {
     elTitle.appendChild(elBack);
 
     var elPath = document.createElement('span');
-    elPath.innerHTML = window.location.pathname;
+    elPath.innerHTML = locus.room; // window.location.pathname;
     elTitle.appendChild(elPath);
 
     var elSpan = document.createElement('span');
@@ -89,3 +89,14 @@ var LocusUI = {
 
 
 // map controls
+function makeMapIcon(size, img, active) {
+  var classes = 'img-circle ';
+  classes += active ? 'pulse-active' : 'inactive';
+  return L.icon({
+    iconUrl: img,
+    iconSize: [size,size],
+    iconAnchor: [25,50],
+    popupAnchor: [0,-54],
+    className: classes
+  });
+};

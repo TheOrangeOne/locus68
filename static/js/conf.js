@@ -47,7 +47,6 @@ function Configuration() {
     AVATAR_UPDATE: 'ava'        // avatar update for a user
   };
 
-
   var self = this;
 
   this.getAvatarURL = function(num) {
@@ -55,7 +54,7 @@ function Configuration() {
   };
 
   this.getRandomAvatar = function() {
-    var randint = Math.floor((Math.random()*25)+1)+'.png';
+    var randint = Math.floor((Math.random()*25)+1);
     return self.getAvatarURL(randint);
   };
 };

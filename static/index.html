@@ -21,7 +21,7 @@
     <div class="pure-u-1 pure-u-md-1-3 l-box">
       <h2>rooms</h2>
       <div class="pure-control-group" v-for="room in rooms">
-        <btn-full v-on:click.native="loadRoom(room)" v-bind:text="roomText(room)"></btn-full>
+        <btn-room v-on:click.native="loadRoom(room)" v-bind:text="roomText(room)"></btn-full>
       </div>
     </div>
     <div class="pure-u-1 pure-u-md-1-3 l-box">

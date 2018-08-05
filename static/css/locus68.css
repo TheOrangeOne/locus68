@@ -60,7 +60,7 @@ h1, h2 {
 }
 
 .avatar-container {
-  height: 2.5em;
+  height: 3.0em;
   overflow-x: auto;
   white-space: nowrap;
 }
@@ -202,8 +202,7 @@ https://purecss.io/grids/
 /* overlay with user configurable settings */
 #settingsOverlay {
   position: fixed; /* Sit on top of the page content */
-  /*display: none;*/ /* Hidden by default */
-  display: block; /* Hidden by default */
+  display: none; /* Hidden by default */
   width: 70%; /* Full width (cover the whole page) */
   height: 70%; /* Full height (cover the whole page) */
   top: 0;
@@ -235,3 +234,52 @@ https://purecss.io/grids/
   font-weight: bold;
 }
 
+.room-button {
+  overflow: hidden;
+}
+
+.inactive {
+  border-color: red;
+}
+
+.pulse-active {
+  margin: 100px;
+  display: block;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1cff32;
+  cursor: pointer;
+  box-shadow: 0 0 0 rgba(28,255,50, 0.4);
+  animation: pulse-active 2s infinite;
+}
+
+.pulse-active:hover {
+  animation: none;
+}
+
+@-webkit-keyframes pulse-active {
+  0% {
+    -webkit-box-shadow: 0 0 0 0 rgba(28, 255, 50, 0.4);
+  }
+  70% {
+    -webkit-box-shadow: 0 0 0 0 rgba(28, 255, 50, 0);
+  }
+  100% {
+    -webkit-box-shadow: 0 0 0 0 rgba(28, 255, 50, 0);
+  }
+}
+@keyframes pulse-active {
+  0% {
+    -moz-box-shadow: 0 0 0 0 rgba(28,255,50, 0.4);
+    box-shadow: 0 0 0 0 rgba(28,255,50, 0.4);
+  }
+  70% {
+    -moz-box-shadow: 0 0 0 10px rgba(28,255,50, 0);
+    box-shadow: 0 0 0 10px rgba(28,255,50, 0);
+  }
+  100% {
+    -moz-box-shadow: 0 0 0 0 rgba(28,255,50, 0);
+    box-shadow: 0 0 0 0 rgba(28,255,50, 0);
+  }
+}

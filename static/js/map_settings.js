@@ -1,8 +1,10 @@
+var Config = Config || {};
+
 var roomSettings = new Vue({
   el: '#settings',
   data: {
     joinRoomName: '',
-    avatars: AVATARS,
+    avatars: Config.AVATARS,
   },
   methods: {
     changeAvatar: function(av) {

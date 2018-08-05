@@ -14,32 +14,25 @@ String.prototype.hashCode = function() {
   return hash;
 };
 
-// http://stackoverflow.com/a/5092846
-function randomColour() {
-  return '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+
+function Library() {
+  var self = this;
+
+  // http://stackoverflow.com/a/5092846
+  this.randomColour = function() {
+    return '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+  }
+
+  this.cryptoHash = function(s) {
+    var md = forge.md.sha512.create();
+    md.update(s);
+    return md.digest();
+  };
+};
+
+
+var Lib = Library();
+
+if (typeof window === 'undefined') {
+  module.exports = Lib;
 }
-
-function getRandomPP() {
-  return '/static/img/rand/'+Math.floor((Math.random()*24)+1)+'.png';
-}
-
-function makeMapIcon(size, img) {
-  return L.icon({
-    iconUrl: img,
-    iconSize: [size,size],
-    iconAnchor: [25,50],
-    popupAnchor: [0,-54],
-    className: 'img-circle'
-  });
-};
-
-function cryptoHash(s) {
-  var md = forge.md.sha512.create();
-  md.update(s);
-  return md.digest();
-};
-
-
-function getAvatarURL(num) {
-  return '/static/img/rand/' + num + '.png';
-};

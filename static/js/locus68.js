@@ -1,5 +1,4 @@
-// TODO: user, map, location can probably be abstracted out
-//       this would be a premature optimization atm
+
 function Locus(roomName, pass, initPos) {
   // thx javascript
   var self = this;
@@ -29,146 +28,93 @@ function Locus(roomName, pass, initPos) {
   this.room;
   this.key;
 
-  this.makeUser = function() {
-    var user = {
-      id: undefined,
-      lat: undefined,
-      lng: undefined,
-      img: undefined,
-      marker: undefined
-    };
-
-    return user;
-  };
-
-  this.makeUsers = function() {
-    var users = {};
-    return users;
-  };
-
-  this.initUser = function() {
-    var user = self.user;
-
-    var id = Math.random()
-      .toString(36)
-      .replace(/[^a-z]+/g, '')
-      .substr(0, 5);
-
-    self.user = {
-      id: user.id || id,
-      lat: user.lat || null,
-      lng: user.lng || null,
-      img: user.img || USER_AVATAR
-    };
-  };
-
-  // serialize a user so that it can be persisted
-  this.serializeUser = function(user) {
-    // what to actually serialize for a user
-    var serUser = {
-      id: user.id,
-      lat: user.lat,
-      lng: user.lng,
-      img: user.img
-    };
-
-    return JSON.stringify(serUser);
-  };
-
-  // deserialize a persisted user
-  this.deserializeUser = function(serUser) {
-    var user = self.makeUser();
-    try {
-      user = JSON.parse(serUser);
-    } catch (err) {
-      console.warn('deserializing user failed');
-    }
-
-    return user;
-  };
+  // this.makeUsers = function() {
+  //   var users = {};
+  //   return users;
+  // };
 
   // serialize the users
-  this.serializeUsers = function(users) {
-    var serUsers = {};
-    for (userId in users) {
-      serUsers[userId] = self.serializeUser(users[userId]);
-    }
+  // this.serializeUsers = function(users) {
+  //   var serUsers = {};
+  //   for (userId in users) {
+  //     serUsers[userId] = self.serializeUser(users[userId]);
+  //   }
 
-    return JSON.stringify(serUsers);
-  };
+  //   return JSON.stringify(serUsers);
+  // };
 
-  this.deserializeUsers = function(serUsers) {
-    var users = self.makeUsers();
-    try {
-      var us = JSON.parse(serUsers);
-      for (userid in us) {
-        users[userid] = self.deserializeUser(us[userid]);
-      }
-    } catch (err) {
-      console.warn('deserializing users failed');
-    }
+  // this.deserializeUsers = function(serUsers) {
+  //   var users = self.makeUsers();
+  //   try {
+  //     var us = JSON.parse(serUsers);
+  //     for (userid in us) {
+  //       users[userid] = self.deserializeUser(us[userid]);
+  //     }
+  //   } catch (err) {
+  //     console.warn('deserializing users failed');
+  //   }
 
-    return users;
-  };
+  //   return users;
+  // };
 
   // persist all relevant state to localStorage to allow seamless
   // rejoining
-  this.persist = function(cleanExit) {
-    var state = {
-      user: self.serializeUser(self.user),
-      users: self.serializeUsers(self.users),
-      ts: Date.now(),
-      cleanExit: cleanExit
-    };
+  // this.persist = function(cleanExit) {
+  //   var state = {
+  //     user: self.serializeUser(self.user),
+  //     users: self.serializeUsers(self.users),
+  //     ts: Date.now(),
+  //     cleanExit: cleanExit
+  //   };
 
-    var serState = JSON.stringify(state);
-    localStorage.setItem(self.room, serState);
-  }
+  //   var serState = JSON.stringify(state);
+  //   localStorage.setItem(self.room, serState);
+  // }
 
   // attempt to restore data from browser storage
-  this.restore = function() {
-    var room;
+  // this.restore = function() {
+  //   var room;
 
-    room = localStorage.getItem(self.room);
-    if (!room) {
-      return;
-    }
+  //   room = localStorage.getItem(self.room);
+  //   if (!room) {
+  //     return;
+  //   }
 
-    room = JSON.parse(room);
-    if (!('ts' in room)) {
-      console.warn('corrupted save data');
-      return;
-    }
+  //   room = JSON.parse(room);
+  //   if (!('ts' in room)) {
+  //     console.warn('corrupted save data');
+  //     return;
+  //   }
 
-    var tdelta = (Date.now() - room.ts) / 1000;
-    if (tdelta > CACHE_LIFETIME) {
-      localStorage.removeItem(room);
-      return;
-    }
+  //   var tdelta = (Date.now() - room.ts) / 1000;
+  //   if (tdelta > Config.CACHE_LIFETIME) {
+  //     localStorage.removeItem(room);
+  //     return;
+  //   }
 
-    self.user = self.deserializeUser(room['user']);
-    self.users = self.deserializeUsers(room['users']);
-  };
+  //   self.user = self.deserializeUser(room['user']);
+  //   self.users = self.deserializeUsers(room['users']);
+  // };
 
-  this.persister = function() {
-    self.persist(false);
-    setTimeout(self.persister, PERSIST_INTERVAL);
-  };
+  // this.persister = function() {
+  //   self.persist(false);
+  //   setTimeout(self.persister, Config.PERSIST_INTERVAL);
+  // };
 
-  // initialize a persistor
-  this.initPersister = function() {
-    this.persister();
-  };
+  // // initialize a persistor
+  // this.initPersister = function() {
+  //   this.persister();
+  // };
 
-  // periodically send out a location update
-  this.updater = function() {
-    self.sendMsg(self.locationUpdateMsg());
-    setTimeout(self.updater, UPDATE_INTERVAL);
-  };
+  // // periodically send out a location update
+  // this.notifier = function() {
+  //   self.sendMsg(self.locationUpdateMsg());
+  //   setTimeout(self.notifier, UPDATE_INTERVAL);
+  // };
 
-  this.initUpdater = function() {
-    this.updater();
-  };
+  // this.initNotifier = function() {
+  //   this.notifier();
+  // };
 
   this.encryptMsg = function(payload) {
     var cipher = forge.cipher.createCipher('AES-GCM', self.key);
@@ -207,7 +153,7 @@ function Locus(roomName, pass, initPos) {
   this.sendMsg = function(msg) {
     // TODO: sign
     var conn = self.conn;
-    if (conn && conn.readyState == WS_STATE.OPEN) {
+    if (conn && conn.readyState == Config.WS_STATE.OPEN) {
       var payload = JSON.stringify(msg);
       payload = self.encryptMsg(payload);
 
@@ -235,11 +181,33 @@ function Locus(roomName, pass, initPos) {
     user.lng = lng;
   };
 
+  this.updateUserTimestamp = function(user) {
+    user.ts = Date.now();
+  };
+
+  this.setUserWatchdog = function(user) {
+    setTimeout(function() {
+      self.userWatchdog(user, user.ts);
+    }, Config.WATCHDOG_TIMEOUT);
+  };
+
+  this.userWatchdog = function(user, ts) {
+    // if the timestamp has been updated since, then ignore
+    if (user.ts > ts) {
+      console.log('woof: ignoring');
+      return;
+    }
+
+    console.assert(user.ts == ts);
+    console.log('arf!', ts, user.ts);
+    this.setUserWatchdog(user);
+  };
+
   this.createUser = function(userId, lat, lng) {
     self.users[userId] = {
       lat: lat,
       lng: lng,
-      img: DEFAULT_AVATAR,
+      img: Config.DEFAULT_AVATAR,
       marker: undefined
     };
   };
@@ -280,6 +248,11 @@ function Locus(roomName, pass, initPos) {
 
     user = users[userId];
 
+    // self.updateUserTimestamp(user);
+
+    // self.setUserWatchdog(user);
+
+
     // finally, render the user feed
     self.render({
       userMarker: true,
@@ -312,8 +285,8 @@ function Locus(roomName, pass, initPos) {
   };
 
   this.msgHandlers = {};
-  this.msgHandlers[MSG_TYPE.LOCATION_UPDATE] = this.handleUserLocationUpdate;
-  this.msgHandlers[MSG_TYPE.AVATAR_UPDATE] = this.handleUserAvatarUpdate;
+  this.msgHandlers[Config.MSG_TYPE.LOCATION_UPDATE] = this.handleUserLocationUpdate;
+  this.msgHandlers[Config.MSG_TYPE.AVATAR_UPDATE] = this.handleUserAvatarUpdate;
 
   this.handleMsg = function(msg) {
     if (msg.type in self.msgHandlers) {
@@ -332,7 +305,7 @@ function Locus(roomName, pass, initPos) {
 
     var msg = {
       user: user.id,
-      type: MSG_TYPE.LOCATION_UPDATE,
+      type: Config.MSG_TYPE.LOCATION_UPDATE,
       data: {
         lat: user.lat,
         lng: user.lng
@@ -347,7 +320,7 @@ function Locus(roomName, pass, initPos) {
 
     var msg = {
       user: user.id,
-      type: MSG_TYPE.AVATAR_UPDATE,
+      type: Config.MSG_TYPE.AVATAR_UPDATE,
       data: {
         img: user.img
       }
@@ -359,7 +332,7 @@ function Locus(roomName, pass, initPos) {
   this.disconnectMsg = function() {
     return {
       user: user.id,
-      type: MSG_TYPE.USER_DC,
+      type: Config.MSG_TYPE.USER_DC,
       data: {}
     };
   };
@@ -376,7 +349,7 @@ function Locus(roomName, pass, initPos) {
 
   this.updateUserMarker = function(user) {
     if (!user.marker && user.lat && user.lng) {
-      var icon = makeMapIcon(ICON_SIZE, user.img);
+      var icon = makeMapIcon(Config.ICON_SIZE, user.img, true);
       user.marker = L.marker([user.lat, user.lng], {
         icon: icon
       }).addTo(self.group);
@@ -576,13 +549,24 @@ function Locus(roomName, pass, initPos) {
       },
       onAdd: function(map) {
         var el = L.DomUtil.create('img', 'img-circle tracker untracked clickable');
-        el.setAttribute('src', self.user.img);
+        el.id = 'locktest';
+        // el.setAttribute('src', self.user.img);
+        el.setAttribute('v-bind:src', 'user.img');
         el.onclick = self.toggleUserLock;
         self.elUserLock = el;
         return el;
       }
     });
     map.addControl(new lockControl());
+    window.u = {
+        img: '/static/img/rand/1.png'
+    };
+    window.lock = new Vue({
+      el: '#locktest',
+      data: {
+        user: window.u
+      }
+    });
 
     var settingsControl = L.Control.extend({
       options: {
@@ -590,13 +574,23 @@ function Locus(roomName, pass, initPos) {
       },
       onAdd: function(map) {
         var el = L.DomUtil.create('span', 'settings-button clickable');
+        el.id = 'vuetest';
         el.innerHTML = '⚙';
         el.onclick = self.showSettings;
         self.elSettings = el;
+        el.setAttribute('src', 'lol');
+        el.setAttribute('v-bind:class', "{ untracked: !tracked }");
         return el;
       }
     });
     map.addControl(new settingsControl());
+
+    window.gear = new Vue({
+      el: '#vuetest',
+      data: {
+        tracked: true
+      }
+    });
 
     // disable double clicking
     map.doubleClickZoom.disable();
@@ -651,26 +645,28 @@ function Locus(roomName, pass, initPos) {
 
   this.initKeyField = function(pass) {
     self.key = forge.pkcs5.pbkdf2(pass, 'nacl', 10000, 16);
-    self.room = cryptoHash(self.key).toHex();
-    console.log('new key ' + forge.util.bytesToHex(self.key) + ' and room ' + self.room);
+    self.room_hash = cryptoHash(self.key).toHex().substr(0, 16);
+    console.log('new key ' + forge.util.bytesToHex(self.key) + ' and room ' + self.room_hash);
   };
 
   this.init = function() {
     if (roomName) {
       self.room = roomName;
-      self.initKeyField(roomName); // temporarily use room name
+      self.initKeyField(roomName); // temporarily use room name to encrypt
     } else if (pass) {
       self.encrypted = true;
       self.initKeyField(pass);
+      self.room = self.room_hash; // use the hash as room
     }
-    self.user = self.makeUser();
-    self.users = self.makeUsers();
+    // self.user = self.makeUser();
+    // self.users = self.makeUsers();
 
     // attempt to restore state from localStorage
-    self.restore();
+    // self.restore();
 
     // initialize the user
-    self.initUser();
+    self.user = new User();
+    self.user.init();
 
     // initialize the map
     self.initMap();
@@ -690,11 +686,11 @@ function Locus(roomName, pass, initPos) {
     self.initLocation(initPos);
 
     // initialize the persistance logic
-    self.initPersister();
+    // self.initPersister();
 
-    // initialize the updater
-    self.initUpdater();
+    // initialize the notifier
+    // self.initNotifier();
   };
 
   this.init();
-}
+};
