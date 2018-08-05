@@ -14,7 +14,9 @@ function Msgr(opts) {
   var self = this;
 
   // sends a msg that is JSON.stringify-able
-  this.send = function(msg) {
+  this.sendMsg = function(msg) {
+    msg = self.crypto.encrypt(msg);
+    this.socket.send();
   };
 };
 

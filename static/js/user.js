@@ -1,6 +1,5 @@
 if (typeof window === 'undefined') {
-  Config = require('./conf.js');
-  Lib = require('./lib.js');
+  var Config = require('./conf.js');
 }
 
 /**

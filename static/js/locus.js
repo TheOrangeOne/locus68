@@ -1,8 +1,9 @@
 if (typeof window === 'undefined') {
-  Config = require('./conf.js');
-  Lib = require('./lib.js');
-  User = require('./user.js').User;
-  Users = require('./users.js');
+  var Config = require('./conf.js'),
+    Lib = require('./lib.js'),
+    User = require('./user.js').User,
+    Users = require('./users.js'),
+    Map = require('./map.js')
 }
 
 /**
@@ -16,46 +17,14 @@ function Locus(opts) {
     lng: opts.lng
   });
   this.otherUsers = new Users();
+  this.map = new Map({
+    user: this.user
+  });
 
   var user = new User();
-  user.init();
-  this.otherUsers.addUser(user);
   var self = this;
 
   this.initMap = function() {
-    var map = L.map('map', {
-      zoomControl: false
-    }).setView([46.423, -100.3248], 3);
-
-    L.tileLayer('https://a.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '<a href="http://osm.org/copyright">OSM</a>'
-    }).addTo(map);
-
-    map.on('zoomstart', function() {
-      self.zooming = true;
-    });
-
-    map.on('zoomend', function() {
-      self.zooming = false;
-    });
-
-    map.on('dragstart', function(e) {
-      if (self.userLock) {
-        self.toggleUserLockOff();
-      }
-
-      if (self.groupLock) {
-        self.toggleGroupLockOff();
-      }
-    });
-
-    map.on('zoomend', function() {});
-
-    map.on('mouseup', function() {
-      map.dragging.enable();
-      map.removeEventListener('mousemove');
-    });
-
     // create the follow-lock control
     var lockControl = L.Control.extend({
       options: {
@@ -99,26 +68,31 @@ function Locus(opts) {
     });
     map.addControl(new settingsControl());
 
-    window.gear = new Vue({
+  };
+
+  this.initComponents = function() {
+    window.users = new Vue({
       el: '#other-users',
       data: {
         users: self.otherUsers.users,
         test: function() {
-          console.log('test')
+          console.log('test');
         }
       }
     });
-
-    // disable double clicking
-    map.doubleClickZoom.disable();
-
-    // create a group for the markers
-    var group = new L.FeatureGroup().addTo(map);
-    self.group = group;
-    self.map = map;
   };
 
-  this.initMap();
+  this.init = function() {
+    self.user.init();
+    var otherUser = new User();
+    otherUser.init();
+    self.otherUsers.addUser(otherUser);
+
+    self.map.init();
+    self.initComponents();
+  };
+
+  this.init();
 };
 
 

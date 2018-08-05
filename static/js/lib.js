@@ -22,12 +22,6 @@ function Library() {
   this.randomColour = function() {
     return '#'+(Math.random()*0xFFFFFF<<0).toString(16);
   }
-
-  this.cryptoHash = function(s) {
-    var md = forge.md.sha512.create();
-    md.update(s);
-    return md.digest();
-  };
 };
 
 
