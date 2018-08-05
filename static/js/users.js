@@ -10,6 +10,8 @@ function Users(opts) {
   opts = opts || {};
 
   this.users = {};
+  this.usersList = [];
+  this.userMap = {};  // map references in obj to list
 
   var self = this;
 
@@ -37,6 +39,17 @@ function Users(opts) {
     }
 
     self.users[user.id] = user;
+    self.userMap[user.id] = self.usersList.length;
+    self.usersList.push(user);
+  };
+
+  this.removeUser = function(userId) {
+    if (self.hasUser(userId)) {
+      delete self.users[userId];
+    }
+    else {
+      console.warn('remove: user dne');
+    }
   };
 
   this.addFromMsgUser = function(msgUser) {

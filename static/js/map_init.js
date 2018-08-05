@@ -45,7 +45,9 @@ function step2(pos) {
   if (pathname.substr(0, 3) === '/r/') {
     var room;
     room = pathname.substr(3, pathname.length);
-    locus = Locus(room, '', pos);
+    //locus = Locus(room, '', pos);
+    console.log('step 2: starting normal room ✓');
+    locus = new Locus({roomName: room, pass: '', lat: pos.coords.latitude, lng: pos.coords.longitude});
   } else if (pathname === '/x' || pathname === '/x/') {
     elKeyOverlay.style.display = 'block';
     elKeyForm.onsubmit = function() {
@@ -63,6 +65,7 @@ function step3(pos) {
 
   // the room name is hash(pass)
   locus = Locus('', pass, pos);
+  // locus = Locus({roomName: '', pass: pass, loc: pos});
   return false;
 };
 

@@ -36,6 +36,17 @@ describe('Users', function() {
       });
     });
 
+    describe('removeUser()', function() {
+      it('should remove a user', function() {
+        var user = new User();
+        users.addUser(user);
+
+        users.removeUser(user.id);
+        var u = users.getUser(user.id);
+        assert.equal(u, null);
+      });
+    });
+
     describe('updateFromMsgUser()', function() {
       it('should add a user from a msguser', function() {
         var msgUser = new MsgUser({

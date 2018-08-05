@@ -58,29 +58,33 @@ function MsgUser(opts) {
 
 function User(opts) {
   opts = opts || {};
-  this.id = opts.id || undefined;
-  this.lat = opts.lat || undefined;
-  this.lng = opts.lng || undefined;
-  this.img = opts.img || undefined;
-  this.ts = opts.ts || undefined; // time since last update
-  this.tsls = opts.tsls || undefined; // time since last seen
-  this.marker = opts.marker || undefined;
+  this.id = opts.id;
+  this.lat = opts.lat;
+  this.lng = opts.lng;
+  this.img = opts.img;
+  this.ts = opts.ts; // time since last update
+  this.tsls = opts.tsls; // time since last seen
+  this.marker = opts.marker;
 
   var self = this;
 
-  this.init = function() {
+  this.genId = function() {
     var id = Math.random()
       .toString(36)
       .replace(/[^a-z]+/g, '')
       .substr(0, 5);
 
-    self.id = self.id || id;
-    self.lat = null;
-    self.lng = null;
+    return id;
+  };
+
+  this.init = function() {
+    self.id = self.id || this.genId();
+    self.lat = self.lat || null;
+    self.lng = self.lng || null;
     self.img = self.img || Config.getRandomAvatar();
-    self.ts = null;
-    self.tsls = null;
-    self.marker = null;
+    self.ts = self.ts || null;
+    self.tsls = self.tsls || null;
+    self.marker = self.marker || null;
   };
 
   // update the update timestamp
@@ -154,6 +158,8 @@ function User(opts) {
     // }
     // return user;
   };
+
+  this.init();
 };
 
 User.deserialize = function(serUser) {
