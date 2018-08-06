@@ -17,23 +17,4 @@ function setWatchLocation(handleChangedLocation) {
   } else {
     // TODO: handle this
   }
-}
-
-// return the initial location of the user or null if retrieving fails
-function initLocation(handleChangedLocation) {
-  if (navigator.geolocation) {
-    navigator
-      .geolocation
-      .watchPosition(
-        handleChangedLocation,
-        function(error) {
-          console.warn('ERROR('+error.code+'): '+error.message);
-        }, {
-          enableHighAccuracy: true,
-          maximumAge: 0
-        }
-      );
-  } else {
-    // TODO: handle this
-  }
-}
+};

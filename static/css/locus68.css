@@ -33,7 +33,6 @@ h1, h2 {
   margin-bottom: 0.1em;
 }
 
-
 .box .row.content {
   flex: 1 1 auto;
 }
@@ -47,13 +46,6 @@ h1, h2 {
 /* stolen from https://www.abeautifulsite.net/how-to-make-rounded-images-with-css */
 .img-circle {
   border-radius: 50%;
-}
-
-/* figured this one out myself! */
-.pps {
-  width: 1.7em;
-  height: 1.7em;
-  cursor: pointer;
 }
 
 .user-lock {
@@ -116,7 +108,7 @@ https://purecss.io/grids/
 .fade-enter-active, .fade-leave-active {
   transition: opacity .5s
 }
-.fade-enter, .fade-leave-to /* .fade-leave-active in <2.1.8 */ {
+.fade-enter, .fade-leave-to {
   opacity: 0
 }
 
@@ -138,32 +130,15 @@ https://purecss.io/grids/
   margin: 0.3em;
 }
 
-.group-item {
-	list-style: none;
-	height: 20px;
-	width: 20px;
-/*
-	height: 1.1em;
-	width: 1.1em;*/
-	position: absolute;
-	top: 50%;
-	left: 50%;
+.group-lock-item {
+  list-style: none;
+  height: 20px;
+  width: 20px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
   margin-left: -10px;
   margin-top: -10px;
-}
-
-/* overlay for the key */
-#keyOverlay {
-  position: fixed; /* Sit on top of the page content */
-  display: none; /* Hidden by default */
-  width: 100%; /* Full width (cover the whole page) */
-  height: 100%; /* Full height (cover the whole page) */
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0,0,0,0.5); /* Black background with opacity */
-  z-index: 2; /* Specify a stack order in case you're using a different order for other elements */
 }
 
 #room-key {
@@ -186,7 +161,7 @@ https://purecss.io/grids/
   z-index: 402;
 }
 
-#roomKey {
+#room-key {
   position: relative;
   width: 100%;
   text-align: center;
@@ -195,7 +170,7 @@ https://purecss.io/grids/
 }
 
 /* overlay with user configurable settings */
-#settingsOverlay {
+#settings-overlay {
   position: fixed; /* Sit on top of the page content */
   display: none; /* Hidden by default */
   width: 70%; /* Full width (cover the whole page) */
@@ -208,15 +183,6 @@ https://purecss.io/grids/
   transform: translate(-50%, -50%);
   background-color: rgb(253,246,227, 0.85);
   z-index: 100000; /* Specify a stack order in case you're using a different order for other elements */
-}
-
-#locFailText {
-  position: relative;
-  top: 40%;
-  width: 100%;
-  text-align: center;
-  margin-top: 30px;
-  font-size: 2em;
 }
 
 .clickable {
@@ -293,7 +259,6 @@ https://purecss.io/grids/
   z-index: 401; /* magic number to play with leaflet */
 }
 
-
 #user {
   display: inline;
 }
@@ -302,7 +267,6 @@ https://purecss.io/grids/
   top: 0;
   right: 0;
   display: inline;
-  /*position: absolute;*/
 }
 
 .other-user {

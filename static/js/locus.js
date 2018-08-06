@@ -113,6 +113,10 @@ function Locus(opts) {
   this.initFinish = function() {
     self.initMap();
     self.initComponents();
+    self.otherUsers.addUser(new User());
+    self.otherUsers.addUser(new User());
+    self.otherUsers.addUser(new User());
+    self.otherUsers.addUser(new User());
   };
 };
 
@@ -155,32 +159,31 @@ Locus.initLocation = function(locus, iopts, next) {
     msg: 'getting location'
   });
   if (navigator.geolocation) {
-    navigator
-      .geolocation.getCurrentPosition(
-        // on success
-        function(pos) {
-          iopts.log.push({
-            type: 'info',
-            msg: 'got location!'
-          });
-          next(locus, iopts);
-        },
-        // on error
-        function(err) {
-          iopts.log.push({
-            type: 'error',
-            msg: 'failed to get location!'
-          });
-        },
-        // options
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,            // wait 15s for location
-          maximumAge: 0              // fetch latest location
-        }
-      )
+    navigator.geolocation.getCurrentPosition(
+      function(pos) {
+        iopts.log.push({
+          type: 'info',
+          msg: 'got location!'
+        });
+        next(locus, iopts);
+      },
+      function(err) {
+        iopts.log.push({
+          type: 'error',
+          msg: 'failed to get location!'
+        });
+      }, {
+        enableHighAccuracy: true,
+        timeout: 15000,  // wait 15s for location
+        maximumAge: 0  // fetch latest location
+      }
+    )
   }
   else {
+    iopts.log.push({
+      type: 'error',
+      msg: 'failed to get location!'
+    });
   }
 };
 
@@ -284,10 +287,6 @@ Locus.init = function(opts) {
       });
     });
   });
-};
-
-Locus.entryPoint = function(opts) {
-  opts = opts || {};
 };
 
 
