@@ -30,6 +30,10 @@ function Locus(opts) {
     return base + self.roomName + '?id=' + self.user.id;
   };
 
+  this.handleLocationUpdate = function(position) {
+    console.log(position);
+  };
+
   this.initComponents = function() {
     self.roomNameVue = new Vue({
       el: '#room-name',
@@ -58,6 +62,11 @@ function Locus(opts) {
 
   this.initOtherUsers = function() {
     self.otherUsers = new Users();
+  };
+
+  this.initLocation = function(pos) {
+    setWatchLocation(self.handleLocationUpdate);
+    self.handleLocationUpdate(pos);
   };
 
   this.onWSCon = function() {
@@ -93,10 +102,13 @@ function Locus(opts) {
     self.map.init();
   };
 
-  this.init = function() {
+  this.initStart = function() {
     self.initUser();
     self.initOtherUsers();
     self.initMsgr();
+  };
+
+  this.initFinish = function() {
     self.initMap();
     self.initComponents();
   };
@@ -114,8 +126,7 @@ Locus.initWS = function(locus, iopts, next) {
 
   // TODO:
   // user, otherUsers should be initialized by this point
-  locus.initUser(); // TODO
-  locus.initMsgr();
+  locus.initStart();
 
   // not sure if this is the best approach
   // we could also have this wait logic implemented on send
@@ -140,7 +151,34 @@ Locus.initLocation = function(locus, iopts, next) {
     type: 'info',
     msg: 'getting location'
   });
-  next(locus, iopts);
+  if (navigator.geolocation) {
+    navigator
+      .geolocation.getCurrentPosition(
+        // on success
+        function(pos) {
+          iopts.log.push({
+            type: 'info',
+            msg: 'got location!'
+          });
+          next(locus, iopts);
+        },
+        // on error
+        function(err) {
+          iopts.log.push({
+            type: 'error',
+            msg: 'failed to get location!'
+          });
+        },
+        // options
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,            // wait 15s for location
+          maximumAge: 0              // fetch latest location
+        }
+      )
+  }
+  else {
+  }
 };
 
 // returns an error message if a password is invalid
@@ -237,8 +275,8 @@ Locus.init = function(opts) {
       // restore will instantiate a Locus obj
       Locus.initWS(locus, iopts, function(locus, iopts) {
         Locus.initLocation(locus, iopts, function(locus, iopts) {
-          // opts.initopts.initializing = false;
-          // locus = new Locus(opts);
+          opts.initopts.initializing = false;
+          locus.initFinish();
         });
       });
     });
@@ -247,30 +285,6 @@ Locus.init = function(opts) {
 
 Locus.entryPoint = function(opts) {
   opts = opts || {};
-  if (navigator.geolocation) {
-    navigator
-      .geolocation
-      .getCurrentPosition(
-        // on success
-        function(pos) {
-          console.log('step 1: location ✓');
-          step2(pos);
-        },
-        // on error
-        function(err) {
-          console.error('error:', err.code, err.message);
-          elLocOverlay.style.display = 'block';
-        },
-        // options
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,            // wait 15s for location
-          maximumAge: 0              // fetch latest location
-        }
-      )
-  }
-  else {
-  }
 };
 
 
