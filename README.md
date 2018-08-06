@@ -1,4 +1,5 @@
 # locus68
+[![Build Status](https://travis-ci.org/TheOrangeOne/locus68.svg?branch=master)](https://travis-ci.org/TheOrangeOne/locus68)
 > third time's a charm
 
 ## building/running
