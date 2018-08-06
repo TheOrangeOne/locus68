@@ -21,6 +21,11 @@ function Msgr(opts) {
 
   var self = this;
 
+  // returns whether this Msgr is ready to communicate
+  this.isReady = function() {
+    return self.socket.isReady();
+  };
+
   // sends a msg that is JSON.stringify-able
   this.sendMsg = function(msg) {
     var smsg = JSON.stringify(msg);

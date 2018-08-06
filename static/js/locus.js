@@ -10,7 +10,7 @@ if (typeof window === 'undefined') {
 }
 
 /**
- * the main application.
+ * the main application
  */
 function Locus(opts) {
   opts = opts || {};
@@ -22,7 +22,6 @@ function Locus(opts) {
   this.map = null;
   this.host = opts.host || null;
 
-  var user = new User();
   var self = this;
 
   // returns a url to the websocket to use for this room and user
@@ -97,53 +96,123 @@ function Locus(opts) {
   this.init = function() {
     self.initUser();
     self.initOtherUsers();
-    // var otherUser = new User();
-    // self.otherUsers.addUser(otherUser);
-
     self.initMsgr();
     self.initMap();
     self.initComponents();
-    // var otherUser = new User();
-    // self.otherUsers.addUser(otherUser);
-    // self.otherUsers.removeUser(otherUser.id);
   };
-
-  this.init();
 };
 
 
 // establishes a websocket connection
-Locus.initWS = function(opts, next) {
-  opts = opts || {};
+Locus.initWS = function(locus, iopts, next) {
+  var room = locus.roomName;
+  var sroom = room.substr(0, 16) + (room.length > 16 ? '...' : '');
+  iopts.log.push({
+    type: 'info',
+    msg: 'connecting to room ' + sroom
+  });
 
-  next(opts);
+  // TODO:
+  // user, otherUsers should be initialized by this point
+  locus.initUser(); // TODO
+  locus.initMsgr();
+
+  // not sure if this is the best approach
+  // we could also have this wait logic implemented on send
+  waitForMsgr = function() {
+    setTimeout(function() {
+      if (!locus.msgr.isReady()) {
+        iopts.log.push({ type: 'info', msg: 'connecting...'});
+        waitForMsgr();
+      }
+      else {
+        iopts.log.push({ type: 'info', msg: 'connected!'});
+        next(locus, iopts);
+      }
+    }, 5);
+  };
+
+  waitForMsgr(locus, next);
 };
 
-Locus.initLocation = function(opts, next) {
-  opts = opts || {};
-  next(opts);
+Locus.initLocation = function(locus, iopts, next) {
+  iopts.log.push({
+    type: 'info',
+    msg: 'getting location'
+  });
+  next(locus, iopts);
 };
 
-// determines whether the room is a secure room
-// is responsible for getting the password if the room is secure
+// returns an error message if a password is invalid
+// else false
+Locus.isInvalidPass = function(pass) {
+  if (!pass || typeof pass !== 'string')
+    return 'must not be empty';
+  if (pass.length < 6)
+    return 'must be at least 6 characters';
+  return false;
+};
+
+/**
+ * determines required room information
+ * for a regular room:
+ *  - the room name
+ * for a secure room:
+ *  - the room password
+ *  - the room name
+ * only on success will initRoom move on to next()
+ */
 Locus.initRoom = function(opts, next) {
   opts = opts || {};
-  opts.initopts.roomKeyEnabled = true;
-  opts.initopts.roomKeySubmit = function(e) {
-    opts.initopts.roomKeyEnabled = false;
-    console.log(e.target.value);
-  };
+  var path = opts.path;
+
   opts.initopts.log.push({
     type: 'info',
     msg: 'initializing room'
-  })
-  next(opts);
+  });
+
+  if (path.substr(0, 3) === '/r/') {
+    opts.roomName = path.substr(3, path.length);
+    next(opts);
+  }
+  else if (path === '/x' || path == '/x/') {
+    opts.initopts.roomKeyEnabled = true;
+    opts.initopts.roomKeyVisible = true;
+
+    // run on submit of room key
+    opts.initopts.roomKeySubmit = function(e) {
+      var val = e.target.value;
+      if (!Locus.isInvalidPass(val)) {
+        opts.initopts.roomKeyEnabled = false;
+        opts.initopts.roomKeyVisible = false;
+        opts.pass = e.target.value;
+        opts.roomName = Crypt.hash(opts.pass).toHex();
+        next(opts);
+      } else {
+        opts.initopts.log.push({
+          type: 'warn',
+          msg: 'key ' + Locus.isInvalidPass(val)
+        });
+      }
+    };
+  } else {
+    // backend should prevent us from ever getting here
+    opts.initopts.log.push({
+      type: 'error',
+      msg: 'invalid route specified'
+    });
+  }
 };
 
 // attempts to restore state from localStorage
 Locus.restore = function(opts, next) {
   opts = opts || {};
-  next(opts);
+  opts.initopts.log.push({
+    type: 'info',
+    msg: 'checking for saved data'
+  });
+  var locus = new Locus(opts);
+  next(locus, opts.initopts);
 };
 
 
@@ -164,9 +233,10 @@ Locus.init = function(opts) {
   });
 
   Locus.initRoom(opts, function(opts) {
-    Locus.restore(opts, function(opts) {
-      Locus.initWS(opts, function(opts) {
-        Locus.initLocation(opts, function(opts) {
+    Locus.restore(opts, function(locus, iopts) {
+      // restore will instantiate a Locus obj
+      Locus.initWS(locus, iopts, function(locus, iopts) {
+        Locus.initLocation(locus, iopts, function(locus, iopts) {
           // opts.initopts.initializing = false;
           // locus = new Locus(opts);
         });

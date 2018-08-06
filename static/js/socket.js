@@ -19,6 +19,11 @@ function Socket(opts) {
 
   var self = this;
 
+  // returns whether the socket is ready to communicate
+  this.isReady = function() {
+    return self.conn.readyState === Socket.WS_STATE.OPEN;
+  };
+
   this.send = function(msg) {
     if (!self.conn) {
       return false;

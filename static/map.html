@@ -23,7 +23,7 @@
       display: opts.initializing ? 'block' : 'none'
     }">
       <transition-group name="log" tag="p">
-        <p v-for="event in opts.log" v-bind:key="event.msg" v-bind:class="{
+        <p v-for="(event, i) in opts.log" v-bind:key="i" v-bind:class="{
         'log-error': event.type === 'error',
         'log-warn': event.type === 'warn',
         'log-info': event.type === 'info'

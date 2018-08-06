@@ -1,5 +1,3 @@
-var locus;
-
 // /* step 1:
 //  * attempt to access the geolocation api and get the initial location.
 //  *
