@@ -102,12 +102,14 @@ function Locus(opts) {
     self.map.init();
   };
 
+  // TODO: i don't like this pattern
   this.initStart = function() {
     self.initUser();
     self.initOtherUsers();
     self.initMsgr();
   };
 
+  // TODO: i don't like this pattern
   this.initFinish = function() {
     self.initMap();
     self.initComponents();
@@ -118,7 +120,8 @@ function Locus(opts) {
 // establishes a websocket connection
 Locus.initWS = function(locus, iopts, next) {
   var room = locus.roomName;
-  var sroom = room.substr(0, 16) + (room.length > 16 ? '...' : '');
+  var ellip = room.length > 16 ? '...' : '';
+  var sroom = room.substr(0, 16) + ellip;
   iopts.log.push({
     type: 'info',
     msg: 'connecting to room ' + sroom
@@ -133,11 +136,11 @@ Locus.initWS = function(locus, iopts, next) {
   waitForMsgr = function() {
     setTimeout(function() {
       if (!locus.msgr.isReady()) {
-        iopts.log.push({ type: 'info', msg: 'connecting...'});
+        iopts.log.push({ type: 'info', msg: 'connecting...' });
         waitForMsgr();
       }
       else {
-        iopts.log.push({ type: 'info', msg: 'connected!'});
+        iopts.log.push({ type: 'info', msg: 'connected!' });
         next(locus, iopts);
       }
     }, 5);

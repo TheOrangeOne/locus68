@@ -56,20 +56,7 @@ h1, h2 {
   cursor: pointer;
 }
 
-/* settings avatars */
-.setting-avatar {
-  width: 2.5em;
-  height: 2.5em;
-  cursor: pointer;
-}
-
-.avatar-container {
-  height: 3.0em;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.tracker {
+.user-lock {
   width: 3.5em;
   height: 3.5em;
   border-color: gray;
@@ -139,16 +126,16 @@ https://purecss.io/grids/
 }
 
 #group-lock {
-	background-color: #fdf6e3;
-	height: 60px;
-	width: 60px;
-	/*height: 3.5em;
-	width: 3.5em;*/
-	border-radius: 50%;
-	position: relative;
+  background-color: #fdf6e3;
+  height: 60px;
+  width: 60px;
+  border-radius: 50%;
+  position: relative;
   border-color: gray;
   border-width: 0.15em;
   border-style: solid;
+  z-index: 401;
+  margin: 0.3em;
 }
 
 .group-item {
@@ -297,23 +284,34 @@ https://purecss.io/grids/
 }
 
 #tool-bar {
-  /*height: 3.5em;*/
-  z-index: 401; /* magic number to play with leaflet */
   position: absolute;
   width: 100%;
   bottom: 0;
   opacity: 0.9;
   padding: 0.5em;
-  /*left: 50%; */
-  /*margin: 0 0 0 -100px; */
   background-color: #fdf6e3;
+  z-index: 401; /* magic number to play with leaflet */
+}
+
+
+#user {
+  display: inline;
 }
 
 #other-users {
-  float: right;
-  /*position: absolute; */
-  left: 60%;
-  top: 30%;
+  top: 0;
+  right: 0;
+  display: inline;
+  /*position: absolute;*/
+}
+
+.other-user {
+  width: 3em;
+  height: 3em;
+  border-color: gray;
+  border-width: 0.15em;
+  border-style: solid;
+  background-color: grey;
 }
 
 .log-error {
@@ -328,3 +326,7 @@ https://purecss.io/grids/
 
 .log-enter-active, .log-leave-active { transition: opacity .5s; }
 .log-enter, .log-leave-to { opacity: 0; }
+
+.leaflet-control-attribution {
+  opacity: 0.5;
+}

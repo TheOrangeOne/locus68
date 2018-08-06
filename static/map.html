@@ -24,9 +24,9 @@
     }">
       <transition-group name="log" tag="p">
         <p v-for="(event, i) in opts.log" v-bind:key="i" v-bind:class="{
-        'log-error': event.type === 'error',
-        'log-warn': event.type === 'warn',
-        'log-info': event.type === 'info'
+          'log-error': event.type === 'error',
+          'log-warn': event.type === 'warn',
+          'log-info': event.type === 'info'
         }">
           <template v-if="event.type === 'error'">
             {{ "error: " + event.msg }}
@@ -72,39 +72,39 @@
       </div>
     </div>
     <div id="map" class="row content">
+      <div v-cloak id="group-lock">
+        <img
+          class="group-item clickable"
+          style="transform: rotate(270deg) translate(0px, 0px) rotate(-270deg);"
+          v-bind:src="user.img"
+        >
+        </img>
+        <img
+          v-cloak
+          v-for="(user, i) in users"
+          class="group-item"
+          v-bind:style="getStyle(i)"
+          v-bind:src="user.img"
+        >
+        </img>
+      </div>
       <div id="tool-bar">
-        <div>
+        <div id="user">
           <img
             v-cloak
             id="user-lock"
-            class="img-circle tracker untracked clickable"
-            v-bind:src="user.img"
-          >
-          </img>
-        </div>
-        <div v-cloak id="group-lock">
-          <img
-            class="group-item clickable"
-            style="transform: rotate(270deg) translate(0px, 0px) rotate(-270deg);"
-            v-bind:src="user.img"
-          >
-          </img>
-          <img
-            v-cloak
-            v-for="(user, i) in users"
-            class="group-item"
-            v-bind:style="getStyle(i)"
+            class="img-circle user-lock untracked clickable"
             v-bind:src="user.img"
           >
           </img>
         </div>
         <div id="other-users">
           <img
-            v-cloak
-            v-for="user in users"
-            class="setting-avatar"
-            v-bind:src="user.img"
-            v-on:click="test"
+          v-cloak
+          v-for="user in users"
+          class="other-user img-circle"
+          v-bind:src="user.img"
+          v-on:click="test"
           >
           </img>
         </div>
