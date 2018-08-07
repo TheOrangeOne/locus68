@@ -31,7 +31,10 @@ function Locus(opts) {
   };
 
   this.handleLocationUpdate = function(position) {
-    console.log(position);
+    if (position) {
+      var coords = position.coords;
+      self.user.updateLocation(coords.latitude, coords.longitude);
+    }
   };
 
   this.initComponents = function() {
@@ -98,8 +101,6 @@ function Locus(opts) {
       user: self.user,
       otherUsers: self.otherUsers
     });
-
-    self.map.init();
   };
 
   // TODO: i don't like this pattern
@@ -165,6 +166,7 @@ Locus.initLocation = function(locus, iopts, next) {
           type: 'info',
           msg: 'got location!'
         });
+        locus.initLocation(pos);
         next(locus, iopts);
       },
       function(err) {
@@ -258,7 +260,6 @@ Locus.restore = function(opts, next) {
   var locus = new Locus(opts);
   next(locus, opts.initopts);
 };
-
 
 Locus.init = function(opts) {
   opts = opts || {};

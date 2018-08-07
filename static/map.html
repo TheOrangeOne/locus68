@@ -72,7 +72,9 @@
       </div>
     </div>
     <div id="map" class="row content">
-      <div v-cloak id="group-lock">
+      <div v-cloak id="group-lock" v-on:click="click" v-bind:class="{
+        untracked: !map.groupLock
+      }">
         <img
           class="group-lock-item clickable"
           style="transform: rotate(270deg) translate(0px, 0px) rotate(-270deg);"
@@ -93,7 +95,12 @@
           <img
             v-cloak
             id="user-lock"
-            class="img-circle user-lock untracked clickable"
+            class="img-circle user-lock clickable"
+            v-on:click="click"
+            v-bind:class="{
+              untracked: !map.userLock
+            }
+            "
             v-bind:src="user.img"
           >
           </img>
