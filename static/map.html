@@ -107,11 +107,11 @@
         </div>
         <div id="other-users">
           <img
-          v-cloak
-          v-for="user in users"
-          class="other-user img-circle"
-          v-bind:src="user.img"
-          v-on:click="test"
+            v-cloak
+            v-for="user in users"
+            class="other-user img-circle"
+            v-bind:src="user.img"
+            v-on:click="userClick(user)"
           >
           </img>
         </div>

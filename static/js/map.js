@@ -32,6 +32,11 @@ function Map(opts) {
     self.map.removeEventListener('mousemove');
   };
 
+  this.unlock = function() {
+    self.userLock = false;
+    self.groupLock = false;
+  };
+
   this.toggleUserLock = function() {
     self.userLock = !self.userLock;
 
@@ -84,15 +89,21 @@ function MapView(map) {
   // keep track of the markers for each user
   this.markers = {};
 
+  this.zoom = null;
+
   var self = this;
 
-  this.setView = function(lat, lng) {
-    self.lmap.setView([lat, lng], self.lmap.getZoom());
+  this.getZoom = function() {
+    return self.lmap.getZoom();
+  };
+
+  this.setView = function(lat, lng, zoom) {
+    self.lmap.setView([lat, lng], zoom || self.getZoom());
   };
 
   this.focusUser = function() {
     var user = self.map.user;
-    self.setView(user.lat, user.lng);
+    self.setView(user.lat, user.lng, MapView.FOCUS_ZOOM);
   };
 
   this.focusGroup = function() {
@@ -102,7 +113,7 @@ function MapView(map) {
   this.flyToUser = function(user) {
     self.lmap.flyTo(
       [user.lat, user.lng],
-      MapView.FOCUS_ZOOM_LEVEL, {
+      MapView.FOCUS_ZOOM, {
       //duration: 5
     });
   };
@@ -150,20 +161,34 @@ function MapView(map) {
     }, { deep: true });
 
     self.userAvatarsVue.$watch('otherUsers', function(val, users) {
-      var user, i;
+      var user, i, danglingMarkers;
+
+      // keep track of markers that no longer have users
+      danglingMarkers = {};
+      for (userId in self.markers) {
+        if (userId == self.map.user.id)
+          continue;
+        danglingMarkers[userId] = true;
+      }
 
       // TODO: make sure to remove markers for removed users
-      /*
-      for (i = 0; i < self.markers.length; ++i) {
+      for (i = 0; i < users.length; ++i) {
         user = users[i];
         self.updateUserMarker(user);
-      }*/
+        delete danglingMarkers[user.id];
+      }
+
+      // remove any dangling markers
+      for (userId in danglingMarkers) {
+        delete self.markers[userId];
+      }
+
       self.resetView();
     }, { deep: true });
   };
 
 
-  this.onUserLockClick = function(e) {
+  this.onUserLockClick = function(ev) {
     self.map.onUserLockClick();
     self.resetView();
   };
@@ -201,6 +226,21 @@ function MapView(map) {
     });
   };
 
+  this.onUserClick = function(user) {
+    self.map.unlock();
+    self.flyToUser(user);
+  };
+
+  this.initUsersList = function() {
+    self.usersVue = new Vue({
+      el: '#other-users',
+      data: {
+        users: self.map.otherUsers.list,
+        userClick: self.onUserClick
+      }
+    });
+  };
+
   this.init = function() {
     // map event handlers
     self.lmap.on('zoomstart', map.zoomstart);
@@ -212,13 +252,18 @@ function MapView(map) {
     self.initUserAvatars();
     self.initUserLock();
     self.initGroupLock();
+    self.initUsersList();
     self.addUserMarker(self.map.user);
   };
 
   this.init();
 };
 
-MapView.FOCUS_ZOOM_LEVEL = 18;
+MapView.SINGLE_CLICK = 0;
+MapView.DOUBLE_CLICK = 1;
+
+
+MapView.FOCUS_ZOOM = 18;
 
 MapView.mapIcon = function(size, img) {
   var classes = 'img-circle ';

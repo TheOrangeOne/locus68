@@ -44,16 +44,6 @@ function Locus(opts) {
         roomname: self.roomName
       }
     });
-
-    self.usersVue = new Vue({
-      el: '#other-users',
-      data: {
-        users: self.otherUsers.list,
-        test: function() {
-          console.log('test');
-        }
-      }
-    });
   };
 
   this.initUser = function() {
@@ -114,10 +104,10 @@ function Locus(opts) {
   this.initFinish = function() {
     self.initMap();
     self.initComponents();
-    self.otherUsers.addUser(new User());
-    self.otherUsers.addUser(new User());
-    self.otherUsers.addUser(new User());
-    self.otherUsers.addUser(new User());
+    self.otherUsers.addUser(new User({
+      lat: 37.774929,
+      lng: -121.419416
+    }));
   };
 };
 
