@@ -207,10 +207,7 @@ https://purecss.io/grids/
 }
 
 .selectedavatar {
-  border-color: #2ded79;
-  border-width: 0.2em;
-  border-style: solid;
-  margin: 0.3em;
+  opacity: 0.2;
 }
 
 .clickable {

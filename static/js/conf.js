@@ -1,5 +1,5 @@
 function Configuration() {
-  this.NUM_AVATARS = 26;
+  this.NUM_AVATARS = 25;
 
   this.AVATARS = [];
   for (var i = 1; i < this.NUM_AVATARS + 1; ++i) {
