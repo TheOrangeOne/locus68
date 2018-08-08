@@ -135,6 +135,7 @@ function MapView(map) {
       icon: MapView.userIcon(user)
     }).addTo(self.group);
 
+    marker.img = user.img;
     self.markers[user.id] = marker;
   };
 
@@ -142,6 +143,9 @@ function MapView(map) {
     if (self.hasUserMarker(user)) {
       var marker = self.markers[user.id];
       marker.setLatLng([user.lat, user.lng]);
+      if (marker.img !== user.img) {
+        marker.setIcon(MapView.userIcon(user));
+      }
     } else {
       self.addUserMarker(user);
     }

@@ -43,6 +43,22 @@ h1, h2 {
   flex: 0 1 40px;
 }
 
+#header {
+  padding-top: 0.3em;
+  height: 1.5em;
+  font-size: 1.25em;
+}
+
+.room-name {
+  display: inline-block;
+}
+
+#settings-toggle {
+  margin-right: 0.3em;
+  float: right;
+  display: inline-block;
+}
+
 /* stolen from https://www.abeautifulsite.net/how-to-make-rounded-images-with-css */
 .img-circle {
   border-radius: 50%;
@@ -147,7 +163,7 @@ https://purecss.io/grids/
   width: 100%;
 }
 
-#initOverlay {
+#init-overlay {
   text-align: center;
   position: fixed; /* Sit on top of the page content */
   display: block; /* Hidden by default */
@@ -158,7 +174,7 @@ https://purecss.io/grids/
   right: 0;
   bottom: 0;
   background-color: rgba(0,0,0,0.5); /* Black background with opacity */
-  z-index: 402;
+  z-index: 10000;
 }
 
 #room-key {
@@ -181,8 +197,20 @@ https://purecss.io/grids/
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgb(253,246,227, 0.85);
+  background-color: rgb(253,246,227, 0.90);
   z-index: 100000; /* Specify a stack order in case you're using a different order for other elements */
+}
+
+.select-avatar {
+  width: 2em;
+  height: 2em;
+}
+
+.selectedavatar {
+  border-color: #2ded79;
+  border-width: 0.2em;
+  border-style: solid;
+  margin: 0.3em;
 }
 
 .clickable {

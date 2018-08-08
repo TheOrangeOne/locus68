@@ -110,7 +110,6 @@ function Locus(opts) {
       self.sendUpdateMsg();
     }
     else if (ret === Users.UPDATE) {
-      console.log('UPDATE');
     }
     else {
       console.warn('failed to update user')
@@ -133,10 +132,31 @@ function Locus(opts) {
   };
 
   this.initComponents = function() {
-    self.roomNameVue = new Vue({
-      el: '#room-name',
+    self.headerVue = new Vue({
+      el: '#header',
       data: {
-        roomname: self.roomName
+        roomname: self.roomName,
+        onSettingsClick: function(ev) {
+          self.settingsVue.visible = !self.settingsVue.visible;
+        }
+      }
+    });
+
+    self.settingsVue = new Vue({
+      el: '#settings-overlay',
+      data: {
+        visible: false,
+        avatars: Config.AVATARS,
+        isUserAvatar: function(avatar) {
+          return Config.getAvatarURL(avatar) === self.user.img;
+        },
+        getAvatarURL: function(avatar) {
+          return Config.getAvatarURL(avatar);
+        },
+        selectAvatar: function(avatar) {
+          self.user.img = Config.getAvatarURL(avatar);
+          self.sendUpdateMsg();
+        }
       }
     });
   };
@@ -357,9 +377,9 @@ Locus.init = function(opts) {
   opts.initopts.log = [{msg: 'initializing...', type: 'info'}];
 
   var initWindow = new Vue({
-    el: '#initOverlay',
+    el: '#init-overlay',
     data: {
-      opts: opts.initopts,
+      opts: opts.initopts
     }
   });
 
