@@ -18,13 +18,6 @@ function Users(opts) {
 
   var self = this;
 
-  // syncs the list and obj references
-  this._sync = function() {
-    var i, v;
-    for (i = 0; i < list.length; ++i) {
-      v = list[i];
-    }
-  };
 
   // returns if a user is stored
   this.hasUser = function(userId) {
@@ -76,17 +69,18 @@ function Users(opts) {
   this.updateFromMsgUser = function(msgUser) {
     if (msgUser.isInvalid()) {
       console.warn('msgUser invalid attrs: ', msgUser.isInvalid());
+      return false;
     }
-    console.assert(!msgUser.isInvalid());
 
-    var user = self.getUser(msgUser);
-    if (user) {
+    if (self.hasUser(msgUser.id)) {
+      var user = self.getUser(msgUser.id);
       user.updateFromMsgUser(msgUser);
+      return Users.UPDATE;
     }
     else {
       self.addFromMsgUser(msgUser);
+      return Users.NEW;
     }
-    return true;
   };
 
   // updates a stored user given a msgUser
@@ -94,6 +88,10 @@ function Users(opts) {
     var user = self.getUser(msgUser.id);
   };
 };
+
+Users.NEW = 0;
+Users.UPDATE = 1;
+
 
 
 if (typeof window === 'undefined') {

@@ -166,7 +166,7 @@ function MapView(map) {
       // keep track of markers that no longer have users
       danglingMarkers = {};
       for (userId in self.markers) {
-        if (userId == self.map.user.id)
+        if (userId === self.map.user.id)
           continue;
         danglingMarkers[userId] = true;
       }
@@ -254,6 +254,7 @@ function MapView(map) {
     self.initGroupLock();
     self.initUsersList();
     self.addUserMarker(self.map.user);
+    self.resetView();
   };
 
   this.init();

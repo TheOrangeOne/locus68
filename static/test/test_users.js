@@ -58,6 +58,7 @@ describe('Users', function() {
           img: '1',
         });
 
+        // should add the user
         users.updateFromMsgUser(msgUser);
 
         var user = users.getUser('test');
@@ -65,6 +66,17 @@ describe('Users', function() {
         assert.equal(user.lat, 123.12);
         assert.equal(user.lng, 432.12);
         assert.equal(user.img, '1');
+
+        msgUser.lat = 124.12;
+        msgUser.lng = 433.12;
+        msgUser.img = '2';
+
+        // should update the user
+        users.updateFromMsgUser(msgUser);
+        assert.equal(user.id, 'test');
+        assert.equal(user.lat, 124.12);
+        assert.equal(user.lng, 433.12);
+        assert.equal(user.img, '2');
       });
     });
   });

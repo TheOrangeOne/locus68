@@ -260,13 +260,13 @@ https://purecss.io/grids/
 }
 
 #user {
-  display: inline;
+  display: inline-block;
 }
 
 #other-users {
   top: 0;
   right: 0;
-  display: inline;
+  display: inline-block;
 }
 
 .other-user {

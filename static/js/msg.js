@@ -38,6 +38,7 @@ function Msgr(opts) {
     var data = evt.data;
     var ct = JSON.parse(data);
     var msg = self.crypto.decrypt(ct);
+    msg = JSON.parse(msg);
     self.onMsg(msg);
   };
 

@@ -9,12 +9,15 @@ if (typeof window === 'undefined') {
     Map = require('./map.js')
 }
 
+var MSG_TYPE = Config.MSG_TYPE;
+
 /**
  * the main application
  */
 function Locus(opts) {
   opts = opts || {};
   this.roomName = opts.roomName || null;
+  this.isHTTPS = opts.isHTTPS || null;
   this.pass = opts.pass || Crypt.hash(this.roomName);
   this.user = opts.user || null;
   this.otherUsers = opts.otherUsers || null;
@@ -22,7 +25,52 @@ function Locus(opts) {
   this.map = null;
   this.host = opts.host || null;
 
+  this.MSG_HANDLER = {};  // used to look up msg handlers
+
   var self = this;
+
+  // registers a message handler
+  this.registerMsgHandler = function(msgType, handler) {
+    self.MSG_HANDLER[msgType] = handler;
+  };
+
+  // returns the corresponding handler for msgType
+  this.msgHandler = function(msgType) {
+    if (!(msgType in self.MSG_HANDLER)) {
+      console.warn('handler not found for msgtype ', msgType);
+      return null;
+    }
+    return self.MSG_HANDLER[msgType];
+  };
+
+  // creates a user update message
+  this.updateMsg = function() {
+    var user, msg;
+
+    user = self.user;
+    msg = {
+      id: user.id,
+      lat: user.lat,
+      lng: user.lng,
+      img: user.img
+    };
+
+    return msg;
+  };
+
+  this.sendMsg = function(type, msg) {
+    var payload = {
+      type: type,
+      user: self.user.id,
+      data: msg
+    };
+
+    self.msgr.sendMsg(payload);
+  };
+
+  this.sendUpdateMsg = function() {
+    self.sendMsg(MSG_TYPE.USER_UPDATE, self.updateMsg());
+  };
 
   // returns a url to the websocket to use for this room and user
   this.getWSURL = function() {
@@ -34,6 +82,53 @@ function Locus(opts) {
     if (position) {
       var coords = position.coords;
       self.user.updateLocation(coords.latitude, coords.longitude);
+      self.sendUpdateMsg();
+    }
+  };
+
+  this.onWSCon = function() {
+    console.log('websocket connected');
+  };
+
+
+  /**
+   * Message handling methods
+   */
+  this.onUpdateMsg = function(userId, data) {
+    console.assert('lat' in data && data.lat);
+    console.assert('lng' in data && data.lng);
+    console.assert('img' in data);
+    if (userId === self.user.id) {
+      return;
+    }
+
+    var ret;
+    ret = self.otherUsers.updateFromMsgUser(new MsgUser(data));
+
+    // if it's a new user, then reply with an update of our own
+    if (ret === Users.NEW) {
+      self.sendUpdateMsg();
+    }
+    else if (ret === Users.UPDATE) {
+      console.log('UPDATE');
+    }
+    else {
+      console.warn('failed to update user')
+    }
+  };
+  this.registerMsgHandler(MSG_TYPE.USER_UPDATE, this.onUpdateMsg);
+
+
+  // handle an incoming message
+  this.onMsg = function(msg) {
+    console.log(msg);
+    console.assert('user' in msg);
+    console.assert('type' in msg);
+    console.assert('data' in msg);
+
+    var handler = self.msgHandler(msg.type);
+    if (handler) {
+      handler(msg.user, msg.data);
     }
   };
 
@@ -62,23 +157,11 @@ function Locus(opts) {
     self.handleLocationUpdate(pos);
   };
 
-  this.onWSCon = function() {
-    console.log('websocket connected');
-    self.msgr.sendMsg({
-      'user': self.user.id
-    });
-  };
-
-  // handle an incoming message
-  this.onMsg = function(msg) {
-    console.log(msg);
-  };
-
   this.initMsgr = function() {
     self.msgr = self.msgr || new Msgr({
       socket: Socket,
       crypto: Crypt,
-      proto: location.protocol === 'https:' ? 'wss' : 'ws',
+      proto: self.isHTTPS ? 'wss' : 'ws',
       url: self.getWSURL(),
       pass: self.pass,
       onMsg: self.onMsg,
@@ -93,26 +176,33 @@ function Locus(opts) {
     });
   };
 
-  // TODO: i don't like this pattern
+  // TODO: this multi-stage initialization pattern feels wrong
+
+  // the first stage of initialization
   this.initStart = function() {
     self.initUser();
     self.initOtherUsers();
     self.initMsgr();
   };
 
-  // TODO: i don't like this pattern
+  // the second and last stage of initialization
   this.initFinish = function() {
     self.initMap();
     self.initComponents();
-    self.otherUsers.addUser(new User({
-      lat: 37.774929,
-      lng: -121.419416
-    }));
+
+    self.sendUpdateMsg();
+
+    // TODO: remove test data
+    // self.otherUsers.addUser(new User({
+    //   lat: 37.774929,
+    //   lng: -121.419416
+    // }));
   };
 };
 
-
-// establishes a websocket connection
+/**
+ *
+ */
 Locus.initWS = function(locus, iopts, next) {
   var room = locus.roomName;
   var ellip = room.length > 16 ? '...' : '';
@@ -122,13 +212,11 @@ Locus.initWS = function(locus, iopts, next) {
     msg: 'connecting to room ' + sroom
   });
 
-  // TODO:
-  // user, otherUsers should be initialized by this point
   locus.initStart();
 
   // not sure if this is the best approach
   // we could also have this wait logic implemented on send
-  waitForMsgr = function() {
+  var waitForMsgr = function() {
     setTimeout(function() {
       if (!locus.msgr.isReady()) {
         iopts.log.push({ type: 'info', msg: 'connecting...' });
@@ -144,6 +232,9 @@ Locus.initWS = function(locus, iopts, next) {
   waitForMsgr(locus, next);
 };
 
+/**
+ *
+ */
 Locus.initLocation = function(locus, iopts, next) {
   iopts.log.push({
     type: 'info',
@@ -240,7 +331,9 @@ Locus.initRoom = function(opts, next) {
   }
 };
 
-// attempts to restore state from localStorage
+/**
+ * Attempts to restore state from localStorage
+ */
 Locus.restore = function(opts, next) {
   opts = opts || {};
   opts.initopts.log.push({
@@ -251,6 +344,9 @@ Locus.restore = function(opts, next) {
   next(locus, opts.initopts);
 };
 
+/**
+ * Initializes a Locus instance using the browser.
+ */
 Locus.init = function(opts) {
   opts = opts || {};
   opts.initopts = opts.initopts || {};
@@ -266,6 +362,8 @@ Locus.init = function(opts) {
       opts: opts.initopts,
     }
   });
+
+  opts.isHTTPS = location.protocol === 'https:';
 
   Locus.initRoom(opts, function(opts) {
     Locus.restore(opts, function(locus, iopts) {
