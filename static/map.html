@@ -144,13 +144,13 @@
     <script src="/static/js/crypto.js"></script>
     <script src="/static/js/map.js"></script>
     <script src="/static/js/locus.js"></script>
+    <script src="/static/js/locus_init.js"></script>
     <script>
-      var locus;
       window.onload = function() {
-        locus = Locus.init({
+        Init.init({
           host: document.location.host,
           path: window.location.pathname
-        });
+        })
       };
     </script>
   </body>

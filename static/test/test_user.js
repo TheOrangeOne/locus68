@@ -125,7 +125,7 @@ describe('User', function() {
       });
     });
 
-    describe('deserialize (static)', function() {
+    describe('deserialize', function() {
       it('should deserialize a serialized user', function() {
         var preUser = new User({
           id: "12345",
@@ -137,9 +137,13 @@ describe('User', function() {
         var suser = preUser.serialize();
         assert(suser);
 
-        var postUser = new User();
-        var postUser = postUser.deserialize(suser);
-        var test = User.deserialize(suser);
+        var postUser = User.deserialize(suser);
+
+        assert.notEqual(preUser, postUser);
+        assert.equal(preUser.id, postUser.id);
+        assert.equal(preUser.lat, postUser.lat);
+        assert.equal(preUser.lng, postUser.lng);
+        assert.equal(preUser.img, postUser.img);
       });
     });
   });

@@ -2,18 +2,6 @@ if (typeof window === 'undefined') {
   var Config = require('./conf.js');
 }
 
-/**
- * A representation of a user meant to be persisted to the
- * localStorage of a browser.
- */
-function PersistUser(opts) {
-  this.id = opts.id;
-  this.lat = opts.lat;
-  this.lng = opts.lng;
-  this.img = opts.img;
-  this.ts = opts.ts;
-};
-
 
 /**
  * TODO: abstract out this generic logic
@@ -62,7 +50,6 @@ function User(opts) {
   this.lng = opts.lng;
   this.img = opts.img;
   this.ts = opts.ts; // time since last update
-  this.tsls = opts.tsls; // time since last seen
   this.marker = opts.marker;
 
   var self = this;
@@ -79,7 +66,6 @@ function User(opts) {
   // update the update timestamp
   this.timestamp = function() {
     self.ts = Date.now();
-    self.tsls = Date.now();
   };
 
   // updates lat, lng
@@ -94,7 +80,7 @@ function User(opts) {
   // updates img
   // returns whether img changed
   this.updateImg = function(img) {
-    var changed = img === self.img;
+    var changed = img !== self.img;
     self.img = img;
     return changed;
   };
@@ -131,21 +117,8 @@ function User(opts) {
       img: self.img
     };
 
-    return JSON.stringify(user);
-  };
-
-  this.deserialize = function(serUser) {
-    var user = User.deserialize(serUser);
-    // if (user) {
-    // }
-    // try {
-    //   serUser = JSON.parse(serUser);
-    //   user = new User(serUser);
-    // } catch (err) {
-    //   console.warn('deserializing user failed');
-    //   user = new User();
-    // }
-    // return user;
+    // return JSON.stringify(user);
+    return user;
   };
 
   this.init = function() {
@@ -164,7 +137,9 @@ function User(opts) {
 User.deserialize = function(serUser) {
   var user;
   try {
-    serUser = JSON.parse(serUser);
+    if (typeof serUser !== 'object')
+      throw new Error('error')
+    // serUser = JSON.parse(serUser);
     user = new User(serUser);
   } catch (err) {
     console.warn('deserializing user failed');

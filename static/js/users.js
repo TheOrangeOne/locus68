@@ -87,10 +87,33 @@ function Users(opts) {
   this.updateUser = function(msgUser) {
     var user = self.getUser(msgUser.id);
   };
+
+  this.serialize = function() {
+    var state = {};
+    var user, userId, serUser;
+    for (userId in self.users) {
+      user = self.getUser(userId);
+      serUser = user.serialize();
+      state[userId] = serUser;
+    }
+    return state;
+  };
 };
 
 Users.NEW = 0;
 Users.UPDATE = 1;
+
+Users.deserialize = function(serUsers) {
+  var serUser, user;
+  var users = new Users();
+  for (userId in serUsers) {
+    serUser = serUsers[userId];
+    user = User.deserialize(serUser);
+    users.addUser(user);
+  }
+
+  return users;
+};
 
 
 

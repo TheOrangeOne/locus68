@@ -151,6 +151,34 @@ function MapView(map) {
     }
   };
 
+  this.updateUserAvatar = function(user) {
+    self.updateUserMarker(user);
+  };
+
+  this.updateUsersAvatars = function(users) {
+    var user, i, danglingMarkers;
+
+    // keep track of markers that no longer have users
+    danglingMarkers = {};
+    for (userId in self.markers) {
+      if (userId === self.map.user.id)
+        continue;
+      danglingMarkers[userId] = true;
+    }
+
+    // TODO: make sure to remove markers for removed users
+    for (i = 0; i < users.length; ++i) {
+      user = users[i];
+      self.updateUserMarker(user);
+      delete danglingMarkers[user.id];
+    }
+
+    // remove any dangling markers
+    for (userId in danglingMarkers) {
+      delete self.markers[userId];
+    }
+  };
+
   this.initUserAvatars = function() {
     self.userAvatarsVue = new Vue({
       data: {
@@ -160,33 +188,12 @@ function MapView(map) {
     });
 
     self.userAvatarsVue.$watch('user', function(val, user) {
-      self.updateUserMarker(user);
+      self.updateUserAvatar(user);
       self.resetView();
     }, { deep: true });
 
     self.userAvatarsVue.$watch('otherUsers', function(val, users) {
-      var user, i, danglingMarkers;
-
-      // keep track of markers that no longer have users
-      danglingMarkers = {};
-      for (userId in self.markers) {
-        if (userId === self.map.user.id)
-          continue;
-        danglingMarkers[userId] = true;
-      }
-
-      // TODO: make sure to remove markers for removed users
-      for (i = 0; i < users.length; ++i) {
-        user = users[i];
-        self.updateUserMarker(user);
-        delete danglingMarkers[user.id];
-      }
-
-      // remove any dangling markers
-      for (userId in danglingMarkers) {
-        delete self.markers[userId];
-      }
-
+      self.updateUsersAvatars(users);
       self.resetView();
     }, { deep: true });
   };
@@ -257,7 +264,8 @@ function MapView(map) {
     self.initUserLock();
     self.initGroupLock();
     self.initUsersList();
-    self.addUserMarker(self.map.user);
+    self.updateUserAvatar(self.map.user);
+    self.updateUsersAvatars(self.map.otherUsers.list);
     self.resetView();
   };
 
