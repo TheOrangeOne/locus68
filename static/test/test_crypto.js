@@ -32,4 +32,17 @@ describe('Crypt', function() {
       assert.equal(msg, pt);
     });
   });
+
+  describe('isEncryptedObj()', function() {
+    it('should ensure a message is encrypted', function() {
+      var msg = 'mymessage';
+      var ct = crypto.encrypt(msg);
+      assert(Crypt.isEncryptedObj(ct));
+    });
+
+    it('should ensure something is not encrypted', function() {
+      var msg = 'mymessage';
+      assert(!Crypt.isEncryptedObj(msg));
+    });
+  });
 });

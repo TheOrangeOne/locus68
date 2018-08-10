@@ -101,6 +101,12 @@ function MapView(map) {
     self.lmap.setView([lat, lng], zoom || self.getZoom());
   };
 
+  this.removeMarker = function(userId) {
+    var marker = self.markers[userId];
+    self.lmap.removeLayer(marker);
+    delete self.markers[userId];
+  };
+
   this.focusUser = function() {
     var user = self.map.user;
     self.setView(user.lat, user.lng, MapView.FOCUS_ZOOM);
@@ -174,8 +180,9 @@ function MapView(map) {
     }
 
     // remove any dangling markers
+    var marker;
     for (userId in danglingMarkers) {
-      delete self.markers[userId];
+      self.removeMarker(userId);
     }
   };
 
@@ -247,7 +254,10 @@ function MapView(map) {
       el: '#other-users',
       data: {
         users: self.map.otherUsers.list,
-        userClick: self.onUserClick
+        userClick: self.onUserClick,
+        pretty: function(tsls) {
+          return Lib.prettyTime(tsls);
+        }
       }
     });
   };

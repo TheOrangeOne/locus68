@@ -111,6 +111,11 @@ function Locus(opts) {
   };
   this.registerMsgHandler(MSG_TYPE.USER_UPDATE, this.onUpdateMsg);
 
+  this.onDCMsg = function(userId, data) {
+    self.otherUsers.setInactive(userId);
+  };
+  this.registerMsgHandler(MSG_TYPE.USER_DISCONNECT, this.onDCMsg);
+
   // handle an incoming message
   this.onMsg = function(msg) {
     console.assert('user' in msg);
@@ -183,7 +188,9 @@ function Locus(opts) {
   };
 
   this.initOtherUsers = function() {
-    self.otherUsers = self.otherUsers || new Users();
+    self.otherUsers = self.otherUsers || new Users({
+      tslsEnabled: true
+    });
   };
 
   this.initLocation = function(pos) {

@@ -121,15 +121,24 @@
           >
           </img>
         </div>
-        <div id="other-users">
-          <img
-            v-cloak
-            v-for="user in users"
-            class="other-user img-circle"
-            v-bind:src="user.img"
-            v-on:click="userClick(user)"
-          >
-          </img>
+        <div v-cloak id="other-users">
+          <div v-cloak style="display: inline-block;" v-for="user in users">
+            <div v-cloak class="other-user-time" v-bind:style="{
+                visibility: user.isActive() ? 'hidden' : 'visible'
+              }">
+              {{ pretty(user.tsls) }}
+            </div>
+            <img
+              class="other-user img-circle"
+              v-bind:class="{
+                useractive: user.isActive(),
+                userinactive: !user.isActive()
+              }"
+              v-bind:src="user.img"
+              v-on:click="userClick(user)"
+            >
+            </img>
+          </div>
         </div>
       </div>
     </div>

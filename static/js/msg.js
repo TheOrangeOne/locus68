@@ -37,8 +37,14 @@ function Msgr(opts) {
   this.onmessage = function(evt) {
     var data = evt.data;
     var ct = JSON.parse(data);
-    var msg = self.crypto.decrypt(ct);
-    msg = JSON.parse(msg);
+    var msg;
+    if (self.Crypt.isEncryptedObj(ct)) {
+      msg = self.crypto.decrypt(ct);
+      msg = JSON.parse(msg);
+    }
+    else {
+      msg = ct;
+    }
     self.onMsg(msg);
   };
 

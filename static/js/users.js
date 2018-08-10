@@ -8,6 +8,7 @@ if (typeof window === 'undefined') {
 
 function Users(opts) {
   opts = opts || {};
+  this.tslsEnabled = opts.tslsEnabled || false; // enable tsls for users
 
   this.users = {};
 
@@ -15,9 +16,7 @@ function Users(opts) {
   // we have to maintain a list of the users as well
   this.list = [];
 
-
   var self = this;
-
 
   // returns if a user is stored
   this.hasUser = function(userId) {
@@ -60,13 +59,14 @@ function Users(opts) {
   };
 
   this.addFromMsgUser = function(msgUser) {
-    var user = User.fromMsgUser(msgUser);
+    msgUser.tslsEnabled = self.tslsEnabled;
+    var user = new User(msgUser);
     self.addUser(user);
   };
 
   // if a user with the same id as msgUser then update it,
   // else create a new use from msgUser
-  this.updateFromMsgUser = function(msgUser) {
+  this.updateFromMsgUser = function(msgUser, update) {
     if (msgUser.isInvalid()) {
       console.warn('msgUser invalid attrs: ', msgUser.isInvalid());
       return false;
@@ -78,18 +78,25 @@ function Users(opts) {
       return Users.UPDATE;
     }
     else {
-      self.addFromMsgUser(msgUser);
+      self.addFromMsgUser(msgUser, update);
       return Users.NEW;
     }
   };
 
-  // updates a stored user given a msgUser
-  this.updateUser = function(msgUser) {
-    var user = self.getUser(msgUser.id);
+  this.setInactive = function(userId) {
+    var user = self.getUser(userId);
+    user.setInactive();
+  };
+
+  this.setActive = function(userId) {
+    var user = self.getUser(userId);
+    user.setActive();
   };
 
   this.serialize = function() {
-    var state = {};
+    var state = {
+      tslsEnabled: self.tslsEnabled
+    };
     var user, userId, serUser;
     for (userId in self.users) {
       user = self.getUser(userId);
@@ -105,7 +112,11 @@ Users.UPDATE = 1;
 
 Users.deserialize = function(serUsers) {
   var serUser, user;
-  var users = new Users();
+  var users = new Users({
+    tslsEnabled: serUsers.tslsEnabled
+  });
+  delete serUsers.tslsEnabled;
+
   for (userId in serUsers) {
     serUser = serUsers[userId];
     user = User.deserialize(serUser);

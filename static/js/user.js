@@ -50,7 +50,9 @@ function User(opts) {
   this.lng = opts.lng;
   this.img = opts.img;
   this.ts = opts.ts; // time since last update
-  this.marker = opts.marker;
+  this.act = opts.act || false; // if the user is active or not
+  this.tslsEnabled = opts.tslsEnabled || false;
+  this.tsls = null;
 
   var self = this;
 
@@ -61,6 +63,26 @@ function User(opts) {
       .substr(0, 6);
 
     return id;
+  };
+
+  this.timeSinceLastUpdate = function() {
+    return Date.now() - self.ts;
+  };
+
+  this.isActive = function() {
+    return self.act;
+  };
+
+  this.setInactive = function() {
+    self.act = false;
+  };
+
+  this.setActive = function(update) {
+    update = update || false;
+    self.act = true;
+    if (update) {
+      self.timestamp();
+    }
   };
 
   // update the update timestamp
@@ -101,7 +123,7 @@ function User(opts) {
     changed = self.updateLocation(msgUser.lat, msgUser.lng) || changed;
     changed = self.updateImg(msgUser.img) || changed;
 
-    self.timestamp();
+    self.setActive(true);
     return true;
   };
 
@@ -114,11 +136,19 @@ function User(opts) {
       id: self.id,
       lat: self.lat,
       lng: self.lng,
-      img: self.img
+      img: self.img,
+      ts: self.ts,
+      tslsEnabled: self.tslsEnabled
     };
 
-    // return JSON.stringify(user);
     return user;
+  };
+
+  this.updateTSLS = function() {
+    if (self.ts) {
+      self.tsls = Date.now() - self.ts;
+    }
+    setTimeout(self.updateTSLS, 15000);
   };
 
   this.init = function() {
@@ -127,8 +157,9 @@ function User(opts) {
     self.lng = self.lng || null;
     self.img = self.img || Config.getRandomAvatar();
     self.ts = self.ts || null;
-    self.tsls = self.tsls || null;
-    self.marker = self.marker || null;
+    if (self.tslsEnabled) {
+      self.updateTSLS();
+    }
   };
 
   this.init();
@@ -137,20 +168,16 @@ function User(opts) {
 User.deserialize = function(serUser) {
   var user;
   try {
-    if (typeof serUser !== 'object')
-      throw new Error('error')
-    // serUser = JSON.parse(serUser);
+    if (typeof serUser !== 'object') {
+      console.warn('deserializing user failed');
+      return null;
+    }
     user = new User(serUser);
   } catch (err) {
     console.warn('deserializing user failed');
     user = null;
   }
   return user;
-};
-
-// returns a user from a msguser
-User.fromMsgUser = function(msgUser) {
-  return new User(msgUser);
 };
 
 if (typeof window === 'undefined') {

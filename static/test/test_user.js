@@ -3,6 +3,7 @@ var Config = require('../js/conf.js');
 var {User, MsgUser} = require('../js/user.js');
 
 
+
 describe('User', function() {
   describe('initialization', function() {
     describe('User()', function() {
@@ -148,20 +149,40 @@ describe('User', function() {
     });
   });
 
-  describe('fromMsgUser', function() {
-    it('should return a user for a msguser', function() {
-      var msgUser = new MsgUser({
-        id: 'test',
-        lat: 123.12,
-        lng: 432.12,
-        img: '2',
+  describe('activity', function() {
+    var user;
+    beforeEach(function() {
+      user = new User({
+        id: 'test'
       });
-      var user = User.fromMsgUser(msgUser);
+      user.init();
+    });
 
-      assert.equal(user.id, 'test');
-      assert.equal(user.lat, 123.12);
-      assert.equal(user.lng, 432.12);
-      assert.equal(user.img, '2');
+    describe('setActive()', function() {
+      it('should set the user as active', function() {
+        user.setActive();
+        assert(user.isActive());
+      });
+    });
+
+    describe('setInactive()', function() {
+      it('should set the user as inactive', function() {
+        user.setInactive();
+        assert(!user.isActive());
+      });
+    });
+
+    describe('updateFromMsgUser()', function() {
+      it('should set the user as active', function() {
+        user.setInactive();
+        user.updateFromMsgUser(new MsgUser({
+          id: 'test',
+          lat: 2.4,
+          lng: 1.2,
+          img: '1'
+        }));
+        assert(user.isActive());
+      });
     });
   });
 });

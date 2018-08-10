@@ -14,7 +14,7 @@ function Configuration() {
 
   // the interval in which to persist to localStorage (milliseconds)
   this.PERSIST_INTERVAL = 5000;
-  this.WATCHDOG_TIMEOUT = 5000;
+  this.WATCHDOG_TIMEOUT = 15000;
 
   // number of seconds in which to keep what is stored in localStorage
   this.CACHE_LIFETIME = 600;

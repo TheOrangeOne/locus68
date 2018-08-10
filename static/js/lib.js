@@ -60,17 +60,30 @@ if (!Object.keys) {
 }
 
 
-function Library() {
-  var self = this;
+function Lib() {};
 
-  // http://stackoverflow.com/a/5092846
-  this.randomColour = function() {
-    return '#'+(Math.random()*0xFFFFFF<<0).toString(16);
-  }
+// http://stackoverflow.com/a/5092846
+Lib.randomColour = function() {
+  return '#'+(Math.random()*0xFFFFFF<<0).toString(16);
 };
 
-
-var Lib = Library();
+Lib.prettyTime = function(time) {
+  if (!time)
+    return '?';
+  var sec = Math.round(time/1000);
+  var min = Math.round(sec/60);
+  var hr = Math.round(min/60);
+  if (sec < 60) {
+    return sec + 's';
+  }
+  else if (min < 60) {
+    return min + 'm';
+  }
+  else if (hr < 60) {
+    return hr + 'h';
+  }
+  return '∞';
+};
 
 if (typeof window === 'undefined') {
   module.exports = Lib;

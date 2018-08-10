@@ -51,6 +51,10 @@ function Crypt(opts) {
   this.init();
 };
 
+Crypt.isEncryptedObj = function(msg) {
+  return typeof msg === 'object' && 'iv' in msg;
+};
+
 Crypt.hash = function(s) {
   var md = forge.md.sha512.create();
   md.update(s);

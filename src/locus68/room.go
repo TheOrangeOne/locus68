@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"log"
 )
 
@@ -37,6 +38,14 @@ func (r *Room) reserve() {
 			if _, ok := r.guests[guest]; ok {
 				delete(r.guests, guest)
 				close(guest.send)
+				go func() {
+					dcMsgJson, _ := json.Marshal(map[string]interface{}{
+						"user": guest.id,
+						"type": "userdc",
+						"data": map[string]interface{}{},
+					})
+					r.broadcast <- dcMsgJson
+				}()
 				log.Printf("%s left room %s", guest.id, r.name)
 			}
 
