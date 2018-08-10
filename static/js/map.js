@@ -255,9 +255,7 @@ function MapView(map) {
       data: {
         users: self.map.otherUsers.list,
         userClick: self.onUserClick,
-        pretty: function(tsls) {
-          return Lib.prettyTime(tsls);
-        }
+        pretty: Lib.prettyTime
       }
     });
   };

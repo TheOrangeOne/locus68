@@ -157,7 +157,6 @@ function User(opts) {
       if (!self.isActive() && self.tsls > User.TIMEOUT_THRESHOLD) {
         self.onTimeout(self);
         self.tslsEnabled = false;
-        // self.ts = null;
       }
     }
     if (self.tslsEnabled) {

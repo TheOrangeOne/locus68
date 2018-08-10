@@ -157,16 +157,6 @@ function Locus(opts) {
   };
 
   this.initComponents = function() {
-    self.headerVue = new Vue({
-      el: '#header',
-      data: {
-        roomname: self.roomName,
-        onSettingsClick: function(ev) {
-          self.settingsVue.visible = !self.settingsVue.visible;
-        }
-      }
-    });
-
     self.settingsVue = new Vue({
       el: '#settings-overlay',
       data: {
@@ -182,6 +172,16 @@ function Locus(opts) {
           if (self.user.updateImg(Config.getAvatarURL(avatar))) {
             self.sendUpdateMsg();
           }
+        }
+      }
+    });
+
+    self.headerVue = new Vue({
+      el: '#header',
+      data: {
+        roomname: self.roomName,
+        onSettingsClick: function(ev) {
+          self.settingsVue.visible = !self.settingsVue.visible;
         }
       }
     });
