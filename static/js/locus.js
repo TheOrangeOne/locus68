@@ -63,7 +63,9 @@ function Locus(opts) {
   };
 
   this.sendUpdateMsg = function() {
-    self.sendMsg(MSG_TYPE.USER_UPDATE, self.updateMsg());
+    if (self.user.isReady()) {
+      self.sendMsg(MSG_TYPE.USER_UPDATE, self.updateMsg());
+    }
   };
 
   // returns a url to the websocket to use for this room and user
@@ -92,10 +94,6 @@ function Locus(opts) {
     console.assert('lat' in data && data.lat);
     console.assert('lng' in data && data.lng);
     console.assert('img' in data);
-    if (userId === self.user.id) {
-      return;
-    }
-
     var ret;
     ret = self.otherUsers.updateFromMsgUser(new MsgUser(data));
 
@@ -111,6 +109,12 @@ function Locus(opts) {
   };
   this.registerMsgHandler(MSG_TYPE.USER_UPDATE, this.onUpdateMsg);
 
+  this.onConnMsg = function(userId, data) {
+    // always send an update in response to a connection
+    self.sendUpdateMsg();
+  };
+  this.registerMsgHandler(MSG_TYPE.USER_CONNECT, this.onConnMsg);
+
   this.onDCMsg = function(userId, data) {
     self.otherUsers.setInactive(userId);
   };
@@ -121,6 +125,9 @@ function Locus(opts) {
     console.assert('user' in msg);
     console.assert('type' in msg);
     console.assert('data' in msg);
+
+    if (msg.user == self.user.id)
+      return;
 
     var handler = self.msgHandler(msg.type);
     if (handler) {

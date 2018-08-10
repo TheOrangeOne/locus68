@@ -136,6 +136,7 @@ Init.restore = function(opts, next) {
   var serState = localStorage.getItem(opts.roomName) || {};
   try {
     serState = JSON.parse(serState);
+    console.log(serState);
     state = Locus.deserialize(serState);
 
     // copy the deserialized state into opts

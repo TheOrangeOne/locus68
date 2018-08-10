@@ -33,6 +33,14 @@ func (r *Room) reserve() {
 		select {
 		case guest := <-r.register:
 			r.guests[guest] = true
+			go func() {
+				cMsgJson, _ := json.Marshal(map[string]interface{}{
+					"user": guest.id,
+					"type": "userco",
+					"data": map[string]interface{}{},
+				})
+				r.broadcast <- cMsgJson
+			}()
 			log.Printf("%s entered room %s", guest.id, r.name)
 		case guest := <-r.unregister:
 			if _, ok := r.guests[guest]; ok {

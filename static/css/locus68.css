@@ -335,8 +335,8 @@ https://purecss.io/grids/
 }
 
 .useractive {
-  border-color: green;
+  border-color: #42f498;
 }
 .userinactive {
-  border-color: red;
+  border-color: #f22424;
 }

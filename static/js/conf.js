@@ -35,6 +35,7 @@ function Configuration() {
    */
   this.MSG_TYPE = {
     USER_UPDATE: 'userup',    // general update for a user
+    USER_CONNECT: 'userco',  // user connected
     USER_DISCONNECT: 'userdc'  // user disconnected
   };
 

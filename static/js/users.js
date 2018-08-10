@@ -58,8 +58,13 @@ function Users(opts) {
     }
   };
 
+  this.onUserTimeout = function(user) {
+    self.removeUser(user.id);
+  };
+
   this.addFromMsgUser = function(msgUser) {
     msgUser.tslsEnabled = self.tslsEnabled;
+    msgUser.onTimeout = self.onUserTimeout;
     var user = new User(msgUser);
     self.addUser(user);
   };
@@ -120,6 +125,7 @@ Users.deserialize = function(serUsers) {
   for (userId in serUsers) {
     serUser = serUsers[userId];
     user = User.deserialize(serUser);
+    user.onTimeout = users.onUserTimeout;
     users.addUser(user);
   }
 

@@ -4,9 +4,9 @@ if (typeof window === 'undefined') {
 
 
 /**
- * TODO: abstract out this generic logic
  * A representation of a user meant to be used in messages
  * between clients.
+ * TODO: abstract out this generic logic
  */
 function MsgUser(opts) {
   this.attrs = {
@@ -53,6 +53,7 @@ function User(opts) {
   this.act = opts.act || false; // if the user is active or not
   this.tslsEnabled = opts.tslsEnabled || false;
   this.tsls = null;
+  this.onTimeout = opts.onTimeout || function(user) {};
 
   var self = this;
 
@@ -63,6 +64,11 @@ function User(opts) {
       .substr(0, 6);
 
     return id;
+  };
+
+  // returns whether this user's data is valid
+  this.isReady = function() {
+    return !!(self.lat && self.lng && self.img);
   };
 
   this.timeSinceLastUpdate = function() {
@@ -147,8 +153,16 @@ function User(opts) {
   this.updateTSLS = function() {
     if (self.ts) {
       self.tsls = Date.now() - self.ts;
+
+      if (!self.isActive() && self.tsls > User.TIMEOUT_THRESHOLD) {
+        self.onTimeout(self);
+        self.tslsEnabled = false;
+        // self.ts = null;
+      }
     }
-    setTimeout(self.updateTSLS, 15000);
+    if (self.tslsEnabled) {
+      setTimeout(self.updateTSLS, 15000);
+    }
   };
 
   this.init = function() {
@@ -164,6 +178,10 @@ function User(opts) {
 
   this.init();
 };
+
+
+// threshold in when the user should be removed completely
+User.TIMEOUT_THRESHOLD = 60*60*1000; // 60*60*1000; // 60 minutes
 
 User.deserialize = function(serUser) {
   var user;
