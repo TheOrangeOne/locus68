@@ -60,6 +60,7 @@ function Users(opts) {
 
   this.onUserTimeout = function(user) {
     self.removeUser(user.id);
+    return true;
   };
 
   this.addFromMsgUser = function(msgUser) {

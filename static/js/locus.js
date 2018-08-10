@@ -172,6 +172,10 @@ function Locus(opts) {
           if (self.user.updateImg(Config.getAvatarURL(avatar))) {
             self.sendUpdateMsg();
           }
+        },
+        leaveRoom: function(evt) {
+          self.persist(true);
+          window.location.href = '/';
         }
       }
     });
@@ -182,6 +186,12 @@ function Locus(opts) {
         roomname: self.roomName,
         onSettingsClick: function(ev) {
           self.settingsVue.visible = !self.settingsVue.visible;
+        }
+      },
+      computed: {
+        roomNamePretty: function() {
+          var ellip = this.roomname.length > 13 ? '...' : '';
+          return this.roomname.substr(0, 13) + ellip;
         }
       }
     });
@@ -259,6 +269,7 @@ Locus.deserialize = function(serState) {
     var state = {
       user: User.deserialize(serState.user),
       otherUsers: Users.deserialize(serState.otherUsers),
+      isSecure: serState.isSecure,
       cleanExit: serState.cleanExit
     };
     return state;

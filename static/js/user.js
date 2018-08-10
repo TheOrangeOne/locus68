@@ -53,7 +53,9 @@ function User(opts) {
   this.act = opts.act || false; // if the user is active or not
   this.tslsEnabled = opts.tslsEnabled || false;
   this.tsls = null;
-  this.onTimeout = opts.onTimeout || function(user) {};
+  this.onTimeout = opts.onTimeout || function(user) {
+    return false;
+  };
 
   var self = this;
 
@@ -155,8 +157,10 @@ function User(opts) {
       self.tsls = Date.now() - self.ts;
 
       if (!self.isActive() && self.tsls > User.TIMEOUT_THRESHOLD) {
-        self.onTimeout(self);
-        self.tslsEnabled = false;
+        // onTimeout must return true for us to disable the timeout
+        if (self.onTimeout(self)) {
+          self.tslsEnabled = false;
+        }
       }
     }
     if (self.tslsEnabled) {
@@ -170,9 +174,7 @@ function User(opts) {
     self.lng = self.lng || null;
     self.img = self.img || Config.getRandomAvatar();
     self.ts = self.ts || null;
-    if (self.tslsEnabled) {
-      self.updateTSLS();
-    }
+    self.updateTSLS();
   };
 
   this.init();
