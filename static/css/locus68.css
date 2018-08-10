@@ -187,23 +187,24 @@ https://purecss.io/grids/
 
 /* overlay with user configurable settings */
 #settings-overlay {
-  position: fixed; /* Sit on top of the page content */
-  display: none; /* Hidden by default */
-  width: 70%; /* Full width (cover the whole page) */
-  height: 70%; /* Full height (cover the whole page) */
+  position: fixed;
+  display: none;
+  width: 90%;
+  height: 80%;
   top: 0;
   bottom: 0;
-  position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: rgb(253,246,227, 0.90);
+  background-color: #fdf6e3;
+  opacity: 0.9;
+
   z-index: 100000; /* Specify a stack order in case you're using a different order for other elements */
 }
 
 .select-avatar {
-  width: 2em;
-  height: 2em;
+  width: 2.5em;
+  height: 2.5em;
 }
 
 .selectedavatar {
