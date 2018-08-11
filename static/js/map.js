@@ -104,6 +104,7 @@ function MapView(map) {
   this.removeMarker = function(userId) {
     var marker = self.markers[userId];
     self.lmap.removeLayer(marker);
+    self.group.removeLayer(marker);
     delete self.markers[userId];
   };
 

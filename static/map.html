@@ -122,6 +122,15 @@
       </div>
 
       <div v-cloak id="side-bar">
+        <div class="clickable" v-on:click="toggle">
+          <i class="fas" style="font-size: 2.5em; margin-bottom: 0.25em"
+            v-bind:class="{
+              'fa-chevron-circle-up': collapsed,
+              'fa-chevron-circle-down': !collapsed
+            }"
+          >
+          </i>
+        </div>
         <div
           id="other-users"
           style="overflow-y: auto; overflow-x: hidden"
@@ -145,15 +154,6 @@
               >
             </img>
           </div>
-        </div>
-        <div class="clickable" v-on:click="toggle">
-          <i class="fas" style="font-size: 2.5em; margin-top: 0.25em"
-            v-bind:class="{
-              'fa-chevron-circle-up': !collapsed,
-              'fa-chevron-circle-down': collapsed
-            }"
-          >
-          </i>
         </div>
       </div>
 
