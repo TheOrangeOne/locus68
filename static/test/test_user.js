@@ -113,7 +113,9 @@ describe('User', function() {
           id: "12345",
           lat: 31.212131,
           lng: 12.321321,
-          img: '10'
+          img: '10',
+          ts: 234234,
+          tslsEnabled: true
         });
 
         var suser = preUser.serialize();
@@ -123,6 +125,8 @@ describe('User', function() {
         assert.equal(postUser.lat, preUser.lat);
         assert.equal(postUser.lng, preUser.lng);
         assert.equal(postUser.img, preUser.img);
+        assert.equal(postUser.ts, preUser.ts);
+        assert.equal(postUser.tslsEnabled, preUser.tslsEnabled);
       });
     });
 
@@ -132,7 +136,8 @@ describe('User', function() {
           id: "12345",
           lat: 31.212131,
           lng: 12.321321,
-          img: '10'
+          img: '10',
+          ts: 3342423
         });
 
         var suser = preUser.serialize();
@@ -145,6 +150,8 @@ describe('User', function() {
         assert.equal(preUser.lat, postUser.lat);
         assert.equal(preUser.lng, postUser.lng);
         assert.equal(preUser.img, postUser.img);
+        assert.equal(preUser.ts, postUser.ts);
+        assert.equal(preUser.tslsEnabled, postUser.tslsEnabled);
       });
     });
   });

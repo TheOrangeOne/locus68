@@ -173,7 +173,6 @@ function MapView(map) {
       danglingMarkers[userId] = true;
     }
 
-    // TODO: make sure to remove markers for removed users
     for (i = 0; i < users.length; ++i) {
       user = users[i];
       self.updateUserMarker(user);

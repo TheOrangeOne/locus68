@@ -7,6 +7,7 @@
 - first time: `go get locus68`
 - every time: `go build locus68`
 - to run: `./locus68`
+- navigate to `localhost:8080` in browser
 
 ## commandline args
 - `--addr host:port` to specify host and port

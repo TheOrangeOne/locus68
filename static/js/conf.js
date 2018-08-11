@@ -49,6 +49,38 @@ function Configuration() {
     var randint = Math.floor((Math.random()*25)+1);
     return self.getAvatarURL(randint);
   };
+
+  this.MIN_PASS_LENGTH = 6;
+
+  // to add a password validation rule add an object with
+  // a test function and a failure reason
+  this.PASS_VALIDATORS = [
+    {
+      test: function(pass) {
+        return pass && typeof pass === 'string';
+      },
+      reason: 'must not be empty'
+    },
+    {
+      test: function(pass) {
+        return pass.length > self.MIN_PASS_LENGTH;
+      },
+      reason: 'must be at least ' + self.MIN_PASS_LENGTH + ' characters'
+    }
+  ];
+
+  // returns an error message if a password is invalid
+  // else false
+  this.isInvalidPass = function(pass) {
+    var i, validator, test;
+    for (i = 0; i < self.PASS_VALIDATORS.length; ++i) {
+      validator = self.PASS_VALIDATORS[i];
+      if (!validator.test(pass)) {
+        return validator.reason;
+      }
+    }
+    return false;
+  };
 };
 
 var Config = new Configuration();

@@ -44,10 +44,6 @@ func serveCreate(w http.ResponseWriter, r *http.Request, hotel *Hotel) {
 func roomHandler(w http.ResponseWriter, r *http.Request, hotel *Hotel) {
 	// TODO
 	// if hotel.hasRoom() {}
-	http.ServeFile(w, r, "static/map.html")
-}
-
-func TestRoomHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "static/room.html")
 }
 
@@ -70,7 +66,6 @@ func main() {
 	r.HandleFunc("/x", func(w http.ResponseWriter, r *http.Request) {
 		roomHandler(w, r, hotel)
 	}).Methods("GET")
-	r.HandleFunc("/t/{room}", TestRoomHandler).Methods("GET")
 	r.HandleFunc("/ws/{room}", hotel.serveHotel)
 	http.Handle("/", r)
 

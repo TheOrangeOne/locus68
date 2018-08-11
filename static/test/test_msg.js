@@ -53,7 +53,7 @@ describe('Msgr', function() {
 
   describe('sendMsg', function() {
     it('should send a message', function() {
-      msgr.sendMsg("mymessage");
+      msgr.sendMsg('mymessage');
     });
   });
 });

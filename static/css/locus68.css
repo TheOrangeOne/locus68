@@ -213,7 +213,7 @@ https://purecss.io/grids/
   height: 2.5em;
 }
 
-.selectedavatar {
+.selected-avatar {
   opacity: 0.2;
 }
 
@@ -319,8 +319,14 @@ https://purecss.io/grids/
   margin: 0.3em;
 }
 
-#other-users {
+#other-users-toggle {
+  font-size: 2.5em;
+  margin-bottom: 0.25em;
+}
 
+#other-users {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .other-user {
@@ -335,24 +341,31 @@ https://purecss.io/grids/
 .log-error {
   color: red;
 }
+
 .log-warn {
   color: yellow;
 }
+
 .log-info {
   color: white;
 }
 
-.log-enter-active, .log-leave-active { transition: opacity .5s; }
-.log-enter, .log-leave-to { opacity: 0; }
+.log-enter-active, .log-leave-active {
+  transition: opacity .5s;
+}
+
+.log-enter, .log-leave-to {
+  opacity: 0;
+}
 
 .leaflet-control-attribution {
   opacity: 0.5;
 }
 
-.useractive {
+.user-active {
   border-color: #42f498;
 }
-.userinactive {
+.user-inactive {
   border-color: #f22424;
 }
 
@@ -367,3 +380,4 @@ https://purecss.io/grids/
 .serv-connecting {
   color: #E9B872;
 }
+

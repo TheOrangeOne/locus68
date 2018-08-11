@@ -25,17 +25,4 @@ describe('Locus', function() {
       // locus.initMap()
     });
   });
-
-  describe('getRoomName', function() {
-    it('should initialize properly', function() {
-      // var locus = new Locus();
-    });
-  });
-
-  describe('validPass', function() {
-    it('should not permit empty passwords', function() {
-      assert.equal(Locus.isInvalidPass(''), 'must not be empty');
-      assert.equal(Locus.isInvalidPass('1234'), 'must be at least 6 characters');
-    });
-  });
 });

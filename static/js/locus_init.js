@@ -27,7 +27,7 @@ Init.webSocket = function(locus, iopts, next) {
         iopts.log.push({ type: 'info', msg: 'connected!' });
         next(locus, iopts);
       }
-    }, 5);
+    }, 500);
   };
 
   waitForMsgr(locus, next);
@@ -100,7 +100,7 @@ Init.room = function(opts, next) {
     // run on submit of room key
     opts.initopts.roomKeySubmit = function(e) {
       var val = e.target.value;
-      if (!Locus.isInvalidPass(val)) {
+      if (!Config.isInvalidPass(val)) {
         opts.initopts.roomKeyEnabled = false;
         opts.initopts.roomKeyVisible = false;
         opts.pass = e.target.value;
@@ -109,7 +109,7 @@ Init.room = function(opts, next) {
       } else {
         opts.initopts.log.push({
           type: 'warn',
-          msg: 'key ' + Locus.isInvalidPass(val)
+          msg: 'key ' + Config.isInvalidPass(val)
         });
       }
     };

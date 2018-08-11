@@ -173,9 +173,7 @@ function Locus(opts) {
         isUserAvatar: function(avatar) {
           return Config.getAvatarURL(avatar) === self.user.img;
         },
-        getAvatarURL: function(avatar) {
-          return Config.getAvatarURL(avatar);
-        },
+        getAvatarURL: Config.getAvatarURL,
         selectAvatar: function(avatar) {
           if (self.user.updateImg(Config.getAvatarURL(avatar))) {
             self.sendUpdateMsg();
@@ -246,7 +244,6 @@ function Locus(opts) {
     });
   };
 
-
   // TODO: this multi-stage initialization pattern feels wrong
 
   // the first stage of initialization
@@ -264,21 +261,12 @@ function Locus(opts) {
     self.persister();
     self.sendUpdateMsg();
 
+    // use this to add users for testing
     // self.otherUsers.addUser(new User({
     //   lat: 37.774929,
     //   lng: -122.419416
     // }));
   };
-};
-
-// returns an error message if a password is invalid
-// else false
-Locus.isInvalidPass = function(pass) {
-  if (!pass || typeof pass !== 'string')
-    return 'must not be empty';
-  if (pass.length < 6)
-    return 'must be at least 6 characters';
-  return false;
 };
 
 Locus.deserialize = function(serState) {
