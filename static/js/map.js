@@ -268,7 +268,7 @@ function MapView(map) {
           if (this.collapsed)
             return 0;
           var nusers = this.users.length;
-          var height = nusers*3.7;
+          var height = nusers*3.8;
           height = height > 28 ? 28 : height;
           return height;
         }
