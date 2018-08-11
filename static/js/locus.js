@@ -251,6 +251,11 @@ function Locus(opts) {
 
     self.persister();
     self.sendUpdateMsg();
+
+    // self.otherUsers.addUser(new User({
+    //   lat: 37.774929,
+    //   lng: -122.419416
+    // }));
   };
 };
 

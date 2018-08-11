@@ -303,10 +303,18 @@ https://purecss.io/grids/
   float: right;
 }
 
-#other-users {
+
+#side-bar {
   top: 0;
   right: 0;
-  display: inline-block;
+  float: left;
+  position: relative;
+  z-index: 401;
+  margin: 0.3em;
+}
+
+#other-users {
+
 }
 
 .other-user {

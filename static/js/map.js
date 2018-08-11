@@ -249,13 +249,29 @@ function MapView(map) {
     self.flyToUser(user);
   };
 
-  this.initUsersList = function() {
-    self.usersVue = new Vue({
-      el: '#other-users',
+  this.initSidebar = function() {
+    self.sidebarVue = new Vue({
+      el: '#side-bar',
       data: {
+        collapsed: false,
         users: self.map.otherUsers.list,
         userClick: self.onUserClick,
-        pretty: Lib.prettyTime
+        pretty: Lib.prettyTime,
+      },
+      methods: {
+        toggle: function() {
+          this.collapsed = !this.collapsed
+        }
+      },
+      computed: {
+        height: function() {
+          if (this.collapsed)
+            return 0;
+          var nusers = this.users.length;
+          var height = nusers*3.7;
+          height = height > 28 ? 28 : height;
+          return height;
+        }
       }
     });
   };
@@ -271,7 +287,7 @@ function MapView(map) {
     self.initUserAvatars();
     self.initUserLock();
     self.initGroupLock();
-    self.initUsersList();
+    self.initSidebar();
     self.updateUserAvatar(self.map.user);
     self.updateUsersAvatars(self.map.otherUsers.list);
     self.resetView();

@@ -11,6 +11,7 @@
     <title>locus</title>
     <script src="/static/js/leaflet.js"></script>
     <link rel=icon href="/static/img/logo192.png"/>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/css/leaflet.css"/>
     <link rel="stylesheet" href="/static/css/locus68.css"/>
     <link rel="stylesheet" href="/static/css/pure-min.css"/>
@@ -87,7 +88,7 @@
         {{ roomNamePretty }}
       </div>
       <div id="settings-toggle" class="clickable" v-on:click="onSettingsClick">
-        <span>⚙</span>
+        <i class="fas fa-cogs"></i>
       </div>
     </div>
     <div id="map" class="row content">
@@ -109,6 +110,43 @@
         >
         </img>
       </div>
+
+      <div v-cloak id="side-bar">
+        <div
+          id="other-users"
+          style="overflow-y: scroll; overflow-x: hidden"
+          v-bind:style="{
+            height: height + 'em'
+          }"
+        >
+          <div style="margin: 0 auto;" v-for="user in users">
+            <div class="other-user-time" v-bind:style="{
+              visibility: user.isActive() ? 'hidden' : 'visible'
+            }">
+              {{ pretty(user.tsls) }}
+            </div>
+            <img class="other-user img-circle"
+              v-bind:class="{
+                useractive: user.isActive(),
+                userinactive: !user.isActive()
+              }"
+              v-bind:src="user.img"
+              v-on:click="userClick(user)"
+              >
+            </img>
+          </div>
+        </div>
+        <div class="clickable" v-on:click="toggle">
+          <i class="fas" style="font-size: 2.5em; margin-top: 0.25em"
+            v-bind:class="{
+              'fa-chevron-circle-up': !collapsed,
+              'fa-chevron-circle-down': collapsed
+            }"
+          >
+          </i>
+        </div>
+      </div>
+
       <div id="tool-bar">
         <div id="user">
           <img
@@ -123,25 +161,6 @@
             v-bind:src="user.img"
           >
           </img>
-        </div>
-        <div v-cloak id="other-users">
-          <div v-cloak style="display: inline-block;" v-for="user in users">
-            <div v-cloak class="other-user-time" v-bind:style="{
-                visibility: user.isActive() ? 'hidden' : 'visible'
-              }">
-              {{ pretty(user.tsls) }}
-            </div>
-            <img
-              class="other-user img-circle"
-              v-bind:class="{
-                useractive: user.isActive(),
-                userinactive: !user.isActive()
-              }"
-              v-bind:src="user.img"
-              v-on:click="userClick(user)"
-            >
-            </img>
-          </div>
         </div>
       </div>
     </div>
