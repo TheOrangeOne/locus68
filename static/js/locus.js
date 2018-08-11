@@ -199,17 +199,16 @@ function Locus(opts) {
       },
       computed: {
         roomNamePretty: function() {
-          var ellip = this.roomname.length > 13 ? '...' : '';
-          return this.roomname.substr(0, 13) + ellip;
+          return Lib.prettyRoomName(this.roomname, 13);
         },
       }
     });
   };
 
-  this.initUser = function() {
+  this.initUser = function(lat, lng) {
     self.user = self.user || new User({
-      lat: opts.lat,
-      lng: opts.lng
+      lat: lat,
+      lng: lng
     });
   };
 
@@ -219,7 +218,7 @@ function Locus(opts) {
     });
   };
 
-  this.initLocation = function(pos) {
+  this.initLocationWatch = function(pos) {
     setWatchLocation(self.handleLocationUpdate);
     self.handleLocationUpdate(pos);
   };
@@ -244,20 +243,33 @@ function Locus(opts) {
     });
   };
 
-  // TODO: this multi-stage initialization pattern feels wrong
-
   // the first stage of initialization
-  this.initStart = function() {
-    self.initUser();
+  this.initWithLocation = function(lat, lng) {
+    self.initUser(lat, lng);
     self.initOtherUsers();
+  };
+
+  this.initWithWS = function() {
     self.initMsgr();
   };
 
-  // the second and last stage of initialization
-  this.initFinish = function() {
+  /**
+   * Once all other initialization has been done, then
+   * it up by generating the map and view components.
+   *
+   * The required thing we want done before this method is
+   * called are:
+   * - user has been created and has the correct location
+   * - websocket connection has been established
+   *
+   * Also kick off the location watcher, persistence and
+   * send out our first update to notify other clients.
+   */
+  this.initFinalize = function() {
     self.initMap();
     self.initComponents();
 
+    self.initLocationWatch();
     self.persister();
     self.sendUpdateMsg();
 

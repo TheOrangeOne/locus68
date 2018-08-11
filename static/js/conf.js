@@ -12,6 +12,12 @@ function Configuration() {
   this.AVATAR_PATH = this.IMG_PATH + 'rand/';
   this.ICON_SIZE = 42; // '0.5em';
 
+  this.GEO_CONFIG = {
+    enableHighAccuracy: true,
+    timeout: 60000,  // wait 1m for location
+    maximumAge: 0  // fetch latest location
+  };
+
   // the interval in which to persist to localStorage (milliseconds)
   this.PERSIST_INTERVAL = 5000;
   this.WATCHDOG_TIMEOUT = 15000;

@@ -196,8 +196,10 @@
     window.onload = function() {
       Init.init({
         host: document.location.host,
-        path: window.location.pathname
-      })
+        path: window.location.pathname,
+        isHTTPS: location.protocol === 'https:',
+        geolocation: navigator.geolocation
+      });
     };
   </script>
   </body>

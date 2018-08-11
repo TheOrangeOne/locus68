@@ -1,70 +1,73 @@
-
 function Init() {};
 
 /**
+ * Attempts to initialize a websocket connection with the
+ * server.
  *
+ * if successful next will be called
  */
-Init.webSocket = function(locus, iopts, next) {
+Init.webSocket = function(opts, locus, next) {
   var room = locus.roomName;
-  var ellip = room.length > 16 ? '...' : '';
-  var sroom = room.substr(0, 16) + ellip;
-  iopts.log.push({
+  opts.addLog({
     type: 'info',
-    msg: 'connecting to room ' + sroom
+    msg: 'connecting to room ' + Lib.prettyRoomName(room, 13)
   });
 
-  locus.initStart();
+  locus.initWithWS();
 
   // not sure if this is the best approach
   // we could also have this wait logic implemented on send
   var waitForMsgr = function() {
     setTimeout(function() {
       if (!locus.msgr.isReady()) {
-        iopts.log.push({ type: 'info', msg: 'connecting...' });
+        opts.addLog({ type: 'info', msg: 'connecting...' });
         waitForMsgr();
       }
       else {
-        iopts.log.push({ type: 'info', msg: 'connected!' });
-        next(locus, iopts);
+        opts.addLog({ type: 'info', msg: 'connected!' });
+        next(opts, locus);
       }
     }, 500);
   };
 
-  waitForMsgr(locus, next);
+  waitForMsgr();
 };
 
 /**
+ * Attempts to get an initial location by querying the
+ * geolocation provider.
  *
+ * if successfull then adds the location information to opts
+ * and calls next
  */
-Init.location = function(locus, iopts, next) {
-  iopts.log.push({
+Init.location = function(opts, locus, next) {
+  opts.addLog({
     type: 'info',
     msg: 'getting location'
   });
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
+
+  if (opts.geolocation) {
+    opts.geolocation.getCurrentPosition(
       function(pos) {
-        iopts.log.push({
+        opts.addLog({
           type: 'info',
           msg: 'got location!'
         });
-        locus.initLocation(pos);
-        next(locus, iopts);
+        var c = pos.coords;
+        locus.initWithLocation(c.latitude, c.longitude);
+        next(opts, locus);
       },
       function(err) {
-        iopts.log.push({
+        opts.addLog({
           type: 'error',
           msg: 'failed to get location!'
         });
-      }, {
-        enableHighAccuracy: true,
-        timeout: 15000,  // wait 15s for location
-        maximumAge: 0  // fetch latest location
-      }
+      },
+      Config.GEO_CONFIG
     )
   }
   else {
-    iopts.log.push({
+    opts.addLog({
       type: 'error',
       msg: 'failed to get location!'
     });
@@ -72,63 +75,10 @@ Init.location = function(locus, iopts, next) {
 };
 
 /**
- * determines required room information
- * for a regular room:
- *  - the room name
- * for a secure room:
- *  - the room password
- *  - the room name
- * only on success will initRoom move on to next()
- */
-Init.room = function(opts, next) {
-  opts = opts || {};
-  var path = opts.path;
-
-  opts.initopts.log.push({
-    type: 'info',
-    msg: 'initializing room'
-  });
-
-  if (path.substr(0, 3) === '/r/') {
-    opts.roomName = path.substr(3, path.length);
-    next(opts);
-  }
-  else if (path === '/x' || path == '/x/') {
-    opts.initopts.roomKeyEnabled = true;
-    opts.initopts.roomKeyVisible = true;
-
-    // run on submit of room key
-    opts.initopts.roomKeySubmit = function(e) {
-      var val = e.target.value;
-      if (!Config.isInvalidPass(val)) {
-        opts.initopts.roomKeyEnabled = false;
-        opts.initopts.roomKeyVisible = false;
-        opts.pass = e.target.value;
-        opts.roomName = Crypt.hash(opts.pass).toHex();
-        next(opts);
-      } else {
-        opts.initopts.log.push({
-          type: 'warn',
-          msg: 'key ' + Config.isInvalidPass(val)
-        });
-      }
-    };
-  } else {
-    // backend should prevent us from ever getting here
-    opts.initopts.log.push({
-      type: 'error',
-      msg: 'invalid route specified'
-    });
-  }
-};
-
-
-/**
- * Attempts to restore state from localStorage
+ * Attempts to restore state from localStorage.
  */
 Init.restore = function(opts, next) {
-  opts = opts || {};
-  opts.initopts.log.push({
+  opts.addLog({
     type: 'info',
     msg: 'checking for saved data'
   });
@@ -144,46 +94,119 @@ Init.restore = function(opts, next) {
       opts[item] = state[item];
     }
   } catch(e) {
-    opts.initopts.log.push({
-      type: 'error',
+    opts.addLog({
+      type: 'warn',
       msg: 'failed to restore state'
     });
   }
 
   console.log(opts);
   // create and return a locus instance from the opts
-  var locus = new Locus(opts);
-  next(locus, opts.initopts);
+  try {
+    var locus = new Locus(opts);
+    next(opts, locus);
+  }
+  catch (e) {
+    opts.addLog({
+      type: 'error',
+      msg: 'could not initialize locus'
+    });
+  }
 };
 
 /**
- * Initializes a Locus instance using the browser.
+ * determines required room information
+ * for a regular room:
+ *  - the room name
+ * for a secure room:
+ *  - the room password
+ *  - the room name
+ *  when the information has been determined, next is called
+ */
+Init.room = function(opts, next) {
+  var path = opts.path;
+
+  opts.addLog({
+    type: 'info',
+    msg: 'initializing room'
+  });
+
+  if (path.substr(0, 3) === '/r/') {
+    opts.roomName = path.substr(3, path.length);
+    next(opts);
+  }
+  else if (path === '/x' || path == '/x/') {
+    opts.roomKeyEnabled = true;
+    opts.roomKeyVisible = true;
+
+    // run on submit of room key
+    opts.roomKeySubmit = function(e) {
+      var val = e.target.value;
+      if (!Config.isInvalidPass(val)) {
+        opts.roomKeyEnabled = false;
+        opts.roomKeyVisible = false;
+        opts.pass = e.target.value;
+        opts.roomName = Crypt.hash(opts.pass).toHex();
+        next(opts);
+      } else {
+        opts.addLog({
+          type: 'warn',
+          msg: 'key ' + Config.isInvalidPass(val)
+        });
+      }
+    };
+  } else {
+    // backend should prevent us from ever getting here
+    opts.addLog({
+      type: 'error',
+      msg: 'invalid route specified'
+    });
+  }
+};
+
+/**
+ * Initializes a Locus instance in the browser.
+ *
+ * this deals with async stuff like obtaining a web socket
+ * connection, location information
  */
 Init.init = function(opts) {
-  opts = opts || {};
-  opts.initopts = opts.initopts || {};
+  var initopts = {
+    roomKeyVisible: false,
+    roomKeyEnabled: true,
+    initializing: true,
+    log: [{
+      type: 'info',
+      msg: 'initializing...'
+    }],
+    addLog: function(opts) {
+      this.log.push({
+        type: opts.type,
+        msg: opts.msg
+      });
+    }
+  };
 
-  opts.initopts.roomKeyVisible = false;
-  opts.initopts.roomKeyEnabled = true;
-  opts.initopts.initializing = true;
-  opts.initopts.log = [{msg: 'initializing...', type: 'info'}];
+  // merge the options given with the init options we will use
+  for (var key in opts) {
+    initopts[key] = opts[key];
+  }
 
   var initWindow = new Vue({
     el: '#init-overlay',
     data: {
-      opts: opts.initopts
+      opts: initopts
     }
   });
 
-  opts.isHTTPS = location.protocol === 'https:';
-
-  Init.room(opts, function(opts) {
-    Init.restore(opts, function(locus, iopts) {
+  // invoke the callback chain
+  Init.room(initopts, function(opts) {
+    Init.restore(opts, function(opts, locus) {
       // restore will instantiate a Locus obj
-      Init.webSocket(locus, iopts, function(locus, iopts) {
-        Init.location(locus, iopts, function(locus, iopts) {
-          opts.initopts.initializing = false;
-          locus.initFinish();
+      Init.location(opts, locus, function(opts, locus) {
+        Init.webSocket(opts, locus, function(opts, locus) {
+          opts.initializing = false;
+          locus.initFinalize();
         });
       });
     });

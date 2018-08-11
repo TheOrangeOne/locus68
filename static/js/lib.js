@@ -68,7 +68,7 @@ Lib.randomColour = function() {
 };
 
 Lib.prettyTime = function(time) {
-  if (!time)
+  if (typeof time !== 'number' || time < 0)
     return '?';
   var sec = Math.round(time/1000);
   var min = Math.round(sec/60);
@@ -79,10 +79,15 @@ Lib.prettyTime = function(time) {
   else if (min < 60) {
     return min + 'm';
   }
-  else if (hr < 60) {
+  else if (hr < 100) {
     return hr + 'h';
   }
   return '∞';
+};
+
+Lib.prettyRoomName = function(roomName, n) {
+  var ellip = roomName.length > n ? '...' : '';
+  return roomName.substr(0, n) + ellip;
 };
 
 if (typeof window === 'undefined') {
