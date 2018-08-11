@@ -86,6 +86,10 @@ function Locus(opts) {
     console.log('websocket connected');
   };
 
+  this.onWSDC = function() {
+    console.log('websocket disconnected');
+  };
+
 
   /**
    * Message handling methods
@@ -133,6 +137,10 @@ function Locus(opts) {
     if (handler) {
       handler(msg.user, msg.data);
     }
+  };
+
+  this.reconnect = function() {
+    self.msgr.reconnect();
   };
 
   this.persist = function(wasCleanExit) {
@@ -184,15 +192,18 @@ function Locus(opts) {
       el: '#header',
       data: {
         roomname: self.roomName,
+        serverStatus: self.serverStatus,
+        msgr: self.msgr,
         onSettingsClick: function(ev) {
           self.settingsVue.visible = !self.settingsVue.visible;
-        }
+        },
+        reconnect: self.reconnect
       },
       computed: {
         roomNamePretty: function() {
           var ellip = this.roomname.length > 13 ? '...' : '';
           return this.roomname.substr(0, 13) + ellip;
-        }
+        },
       }
     });
   };
@@ -223,7 +234,8 @@ function Locus(opts) {
       url: self.getWSURL(),
       pass: self.pass,
       onMsg: self.onMsg,
-      onopen: self.onWSCon
+      onopen: self.onWSCon,
+      onclose: self.onWSDC,
     });
   };
 

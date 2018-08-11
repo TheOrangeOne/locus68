@@ -13,17 +13,28 @@ function Msgr(opts) {
   this.proto = opts.proto || null;
   this.pass = opts.pass || null;
   this.onMsg = opts.onMsg || function() {};
-  this.onopen = opts.onopen || null;
-  this.onclose = opts.onclose || null;
+  this.onOpen = opts.onopen || null;
+  this.onClose = opts.onclose || null;
 
   this.Socket = opts.socket || Socket;
   this.Crypt = opts.crypto || Crypt;
+  this.status = Msgr.STATUS.UNINIT;
 
   var self = this;
 
   // returns whether this Msgr is ready to communicate
   this.isReady = function() {
     return self.socket.isReady();
+  };
+
+  this.onopen = function(ev) {
+    self.status = Msgr.STATUS.CONN;
+    self.onOpen(ev);
+  };
+
+  this.onclose = function(ev) {
+    self.status = Msgr.STATUS.DCONN;
+    self.onClose(ev);
   };
 
   // sends a msg that is JSON.stringify-able
@@ -48,7 +59,15 @@ function Msgr(opts) {
     self.onMsg(msg);
   };
 
-  this.init = function() {
+  this.reconnect = function() {
+    if (self.status !== Msgr.STATUS.RCONN &&
+        self.status !== Msgr.STATUS.CONN) {
+      self.status = Msgr.STATUS.RCONN;
+      self.initSocket();
+    }
+  };
+
+  this.initSocket = function() {
     self.socket = new self.Socket({
       proto: self.proto,
       url: self.url,
@@ -56,6 +75,10 @@ function Msgr(opts) {
       onopen: self.onopen,
       onclose: self.onclose
     });
+  };
+
+  this.init = function() {
+    self.initSocket();
 
     self.crypto = new self.Crypt({
       pass: self.pass
@@ -63,6 +86,13 @@ function Msgr(opts) {
   };
 
   this.init();
+};
+
+Msgr.STATUS = {
+  UNINIT: -1,
+  CONN: 0,
+  DCONN: 1,
+  RCONN: 2
 };
 
 if (typeof window === 'undefined') {

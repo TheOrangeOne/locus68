@@ -90,6 +90,16 @@
       <div id="settings-toggle" class="clickable" v-on:click="onSettingsClick">
         <i class="fas fa-cogs"></i>
       </div>
+      <div id="server-status">
+        <i class="fas fa-server" v-bind:class="{
+          'serv-connected': msgr.status === 0,
+          'serv-disconnected': msgr.status === 1,
+          'serv-connecting': msgr.status === 2
+          }"
+          v-on:click="reconnect"
+        >
+        </i>
+      </div>
     </div>
     <div id="map" class="row content">
       <div v-cloak id="group-lock" v-on:click="click" v-bind:class="{

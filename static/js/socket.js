@@ -28,9 +28,9 @@ function Socket(opts) {
     if (!self.conn) {
       return false;
     }
-    // if (conn.readyState !== Socket.WS_STATE.OPEN) {
-    //   return false;
-    // }
+    if (conn.readyState !== Socket.WS_STATE.OPEN) {
+      return false;
+    }
     self.conn.send(msg);
   };
 

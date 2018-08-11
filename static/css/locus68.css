@@ -53,6 +53,12 @@ h1, h2 {
   display: inline-block;
 }
 
+#server-status {
+  margin-right: 0.3em;
+  float: right;
+  display: inline-block;
+}
+
 #settings-toggle {
   margin-right: 0.3em;
   float: right;
@@ -348,4 +354,16 @@ https://purecss.io/grids/
 }
 .userinactive {
   border-color: #f22424;
+}
+
+.serv-connected {
+  color: #90A959;
+}
+
+.serv-disconnected {
+  color: #A63D40;
+}
+
+.serv-connecting {
+  color: #E9B872;
 }
