@@ -5,7 +5,6 @@ if (typeof window === 'undefined') {
     Users = require('./users.js'),
     Crypt = require('./crypto.js'),
     Socket = require('./socket.js'),
-    Msgr = require('./msg.js'),
     Map = require('./map.js')
 }
 
@@ -23,9 +22,10 @@ function Locus(opts) {
   this.pass = opts.pass || Crypt.hash(this.roomName);
   this.user = opts.user || null;
   this.otherUsers = opts.otherUsers || null;
-  this.msgr = opts.msgr || null;
+  this.socket = opts.socket || null;
   this.map = null;
   this.host = opts.host || null;
+  this.WebSocket = opts.WebSocket || null;
 
   this.MSG_HANDLER = {};  // used to look up msg handlers
 
@@ -59,7 +59,7 @@ function Locus(opts) {
       data: msg
     };
 
-    self.msgr.sendMsg(payload);
+    self.socket.send(payload);
   };
 
   this.sendUpdateMsg = function() {
@@ -139,7 +139,7 @@ function Locus(opts) {
   };
 
   this.reconnect = function() {
-    self.msgr.reconnect();
+    self.socket.reconnect();
   };
 
   this.persist = function(wasCleanExit) {
@@ -161,6 +161,10 @@ function Locus(opts) {
   this.persister = function() {
     self.persist(false);
     setTimeout(self.persister, Config.PERSIST_INTERVAL);
+  };
+
+  this.isWSReady = function() {
+    return self.socket.isReady();
   };
 
   this.initComponents = function() {
@@ -189,8 +193,7 @@ function Locus(opts) {
       el: '#header',
       data: {
         roomname: self.roomName,
-        serverStatus: self.serverStatus,
-        msgr: self.msgr,
+        socket: self.socket,
         onSettingsClick: function(ev) {
           self.settingsVue.visible = !self.settingsVue.visible;
         },
@@ -200,6 +203,9 @@ function Locus(opts) {
         roomNamePretty: function() {
           return Lib.prettyRoomName(this.roomname, 13);
         },
+        socketStatus: function() {
+          return this.socket.status;
+        }
       }
     });
   };
@@ -222,16 +228,15 @@ function Locus(opts) {
     self.handleLocationUpdate(pos);
   };
 
-  this.initMsgr = function() {
-    self.msgr = self.msgr || new Msgr({
-      socket: Socket,
-      crypto: Crypt,
+  this.initSocket = function() {
+    self.socket = self.socket || new Socket({
+      Crypt: Crypt,
       proto: self.isHTTPS ? 'wss' : 'ws',
       url: self.getWSURL(),
       pass: self.pass,
       onMsg: self.onMsg,
-      onopen: self.onWSCon,
-      onclose: self.onWSDC,
+      onOpen: self.onWSCon,
+      onClose: self.onWSDC,
     });
   };
 
@@ -249,7 +254,7 @@ function Locus(opts) {
   };
 
   this.initWithWS = function() {
-    self.initMsgr();
+    self.initSocket();
   };
 
   /**

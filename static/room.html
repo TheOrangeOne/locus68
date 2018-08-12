@@ -99,11 +99,10 @@
       </div>
       <div id="server-status">
         <i class="fas fa-server" v-bind:class="{
-          'serv-uninit': msgr.status === -1,
-          'serv-connected': msgr.status === 0,
-          'serv-disconnected': msgr.status === 1,
-          'clickable': msgr.status === 1,
-          'serv-connecting': msgr.status === 2
+          'serv-connected': socketStatus === 1,
+          'serv-disconnected': socketStatus === 3,
+          'clickable': socketStatus === 3,
+          'serv-connecting': socketStatus === 0
           }"
           v-on:click="reconnect"
         >
@@ -189,7 +188,6 @@
   <script src="/static/js/users.js"></script>
   <script src="/static/js/loc.js"></script>
   <script src="/static/js/socket.js"></script>
-  <script src="/static/js/msg.js"></script>
   <script src="/static/js/crypto.js"></script>
   <script src="/static/js/map.js"></script>
   <script src="/static/js/locus.js"></script>
@@ -200,7 +198,8 @@
         host: document.location.host,
         path: window.location.pathname,
         isHTTPS: location.protocol === 'https:',
-        geolocation: navigator.geolocation
+        geolocation: navigator.geolocation,
+        WebSocket: window.WebSocket
       });
     };
   </script>

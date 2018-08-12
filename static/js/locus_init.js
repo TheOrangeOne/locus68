@@ -19,7 +19,7 @@ Init.webSocket = function(opts, locus, next) {
   // we could also have this wait logic implemented on send
   var waitForMsgr = function() {
     setTimeout(function() {
-      if (!locus.msgr.isReady()) {
+      if (!locus.isWSReady()) {
         opts.addLog({ type: 'info', msg: 'connecting...' });
         waitForMsgr();
       }

@@ -3,7 +3,6 @@ var Config = require('../js/conf.js');
 var {User, MsgUser} = require('../js/user.js');
 
 
-
 describe('User', function() {
   describe('initialization', function() {
     describe('User()', function() {
