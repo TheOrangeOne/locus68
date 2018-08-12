@@ -4,6 +4,7 @@
 function Socket(opts) {
   opts = opts || {};
 
+  this.WebSocket = opts.WebSocket;
   this.proto = opts.proto || 'wss';
   this.url = opts.url || null;
   this.onopen = opts.onopen || function(evt) {
@@ -39,12 +40,12 @@ function Socket(opts) {
   };
 
   this.init = function() {
-    if (!window['WebSocket']) {
+    if (!self.WebSocket) {
       // TODO: appropriate error
       console.error('browser does not support websockets');
       return false;
     }
-    conn = new WebSocket(self.getURL());
+    conn = new self.WebSocket(self.getURL());
 
     conn.onopen = self.onopen;
     conn.onclose = self.onclose;

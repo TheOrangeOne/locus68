@@ -90,7 +90,6 @@ function Locus(opts) {
     console.log('websocket disconnected');
   };
 
-
   /**
    * Message handling methods
    */
@@ -130,7 +129,7 @@ function Locus(opts) {
     console.assert('type' in msg);
     console.assert('data' in msg);
 
-    if (msg.user == self.user.id)
+    if (msg.user === self.user.id)
       return;
 
     var handler = self.msgHandler(msg.type);

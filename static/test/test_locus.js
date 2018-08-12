@@ -25,4 +25,5 @@ describe('Locus', function() {
       // locus.initMap()
     });
   });
+
 });
