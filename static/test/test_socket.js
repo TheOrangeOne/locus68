@@ -64,8 +64,8 @@ describe('Socket', function() {
           assert.equal(messages.length, 1);
           assert.deepEqual(messages[0], msg);
           server.stop(done);
-        }, 5);
-      }, 5);
+        }, 15);
+      }, 15);
     });
   });
 });
