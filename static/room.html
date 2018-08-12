@@ -99,8 +99,10 @@
       </div>
       <div id="server-status">
         <i class="fas fa-server" v-bind:class="{
+          'serv-uninit': msgr.status === -1,
           'serv-connected': msgr.status === 0,
           'serv-disconnected': msgr.status === 1,
+          'clickable': msgr.status === 1,
           'serv-connecting': msgr.status === 2
           }"
           v-on:click="reconnect"

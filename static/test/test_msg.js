@@ -3,7 +3,7 @@ var Config = require('../js/conf.js');
 var Socket = require('../js/socket.js');
 var { User, MsgUser } = require('../js/user.js');
 var Msgr = require('../js/msg.js');
-var { WebSocket } = require('./mock-socket');
+var { WebSocket } = require('./mock-socket.min.js');
 
 
 function MockCrypto(opts) {

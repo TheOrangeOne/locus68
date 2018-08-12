@@ -368,6 +368,10 @@ https://purecss.io/grids/
   border-color: #f22424;
 }
 
+.serv-uninit {
+  color: #151515;
+}
+
 .serv-connected {
   color: #90A959;
 }
