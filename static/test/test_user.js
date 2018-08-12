@@ -115,7 +115,7 @@ describe('User', function() {
           lng: 12.321321,
           img: '10',
           ts: 234234,
-          tslsEnabled: true
+          tslsEnabled: false
         });
 
         var suser = preUser.serialize();
