@@ -27,6 +27,8 @@ function Locus(opts) {
   this.host = opts.host || null;
   // whether or not to persist to periodically localStorage
   this.persistEnabled = opts.persistEnabled;
+  // whether user time since last seen updating is enabled
+  this.tslsEnabled = opts.tslsEnabled;
   // whether or not to enable the UI (map and components)
   this.uiEnabled = opts.uiEnabled;
   this.Map = opts.Map || null;
@@ -228,7 +230,7 @@ function Locus(opts) {
 
   this.initOtherUsers = function() {
     self.otherUsers = self.otherUsers || new Users({
-      tslsEnabled: true
+      tslsEnabled: self.tslsEnabled
     });
   };
 

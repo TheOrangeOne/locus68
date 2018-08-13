@@ -18,9 +18,10 @@ const locusMockOpts = {
   Map: MockMap,
   host: 'localhost',
   Geolocation: MockGeolocation,
-  uiEnabled: false,
   isHTTPS: true,
   persistEnabled: false,
+  tslsEnabled: false,
+  uiEnabled: false,
 };
 
 const serverURL = 'wss://localhost/ws/mockRoom?id=userid';
