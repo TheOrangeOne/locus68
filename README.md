@@ -10,7 +10,10 @@
 - navigate to `localhost:8080` in browser
 
 ## commandline args
-- `--addr host:port` to specify host and port
+- `--host <host>`
+- `--port <port>`
+
+Note that the environment variables `HOST` and `PORT` can be specified as well.
 
 ## testing
 
