@@ -185,6 +185,9 @@ function Locus(opts) {
         leaveRoom: function(evt) {
           self.persist(true);
           window.location.href = '/';
+        },
+        exitSettings: function(evt) {
+          self.settingsVue.visible = !self.settingsVue.visible;
         }
       }
     });
