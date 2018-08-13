@@ -7,16 +7,17 @@ if (typeof window === 'undefined') {
  */
 function Socket(opts) {
   opts = opts || {};
-  this.proto = opts.proto || 'wss';
+  this.proto = opts.secure ? 'wss' : 'ws';
   this.url = opts.url || null;
   this.pass = opts.pass || null;
-  this.conn = null;
   this.onMsg = opts.onMsg || function(ev) {};
   this.onOpen = opts.onOpen || function(ev) {};
   this.onClose = opts.onClose || function(ev) {};
   this.onError = opts.onError || function(ev) {};
   this.WebSocket = opts.WebSocket || window.WebSocket;
-  this.Crypt = opts.Crypto || Crypt;
+  this.conn = null;
+  this.Crypto = opts.Crypto || Crypt;
+  this.crypto = null;
   this.status = Socket.STATE.CONNECTING;
 
   this.onopen = function(evt) {
@@ -28,7 +29,7 @@ function Socket(opts) {
     var data = evt.data;
     var ct = JSON.parse(data);
     var msg;
-    if (self.Crypt.isEncryptedObj(ct)) {
+    if (self.Crypto.isEncryptedObj(ct)) {
       msg = self.crypto.decrypt(ct);
       msg = JSON.parse(msg);
     }
@@ -80,7 +81,7 @@ function Socket(opts) {
   };
 
   this.init = function() {
-    self.crypto = new self.Crypt({
+    self.crypto = new self.Crypto({
       pass: self.pass
     });
 

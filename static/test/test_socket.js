@@ -5,6 +5,8 @@ var { User, MsgUser } = require('../js/user.js');
 var { WebSocket, Server } = require('./mock-socket.min.js');
 
 
+function NoopWebSocket(opts) {};
+
 function MockCrypto(opts) {
   opts = opts || {};
   assert(opts.pass);
@@ -23,8 +25,9 @@ MockCrypto.isEncryptedObj = Crypt.isEncryptedObj;
 var mockOpts = {
   WebSocket: WebSocket,
   Crypto: MockCrypto,
-  url: 'localhost/ws/room?id=fdasfa',
-  pass: 'test'
+  url: 'localhost/ws/mockRoom?id=mockUserId',
+  pass: 'test',
+  secure: true,
 };
 
 describe('Socket', function() {
@@ -37,9 +40,33 @@ describe('Socket', function() {
     });
   });
 
+  describe('getURL', () => {
+    it('should return the correct secure address', () => {
+      const sock = new Socket({
+        ...mockOpts,
+        WebSocket: NoopWebSocket,
+        url: 'localhost/ws/asdf',
+        secure: true,
+      });
+
+      assert.equal(sock.getURL(), 'wss://localhost/ws/asdf');
+    });
+
+    it('should return the correct insecure address', () => {
+      const sock = new Socket({
+        ...mockOpts,
+        WebSocket: NoopWebSocket,
+        url: 'localhost/ws/asdf',
+        secure: false,
+      });
+
+      assert.equal(sock.getURL(), 'ws://localhost/ws/asdf');
+    });
+  });
+
   describe('send', function() {
     it('should send a message', function(done) {
-      var server = new Server('wss://localhost/ws/room?id=fdasfa');
+      var server = new Server('wss://localhost/ws/mockRoom?id=mockUserId');
       var messages = [];
       var msg = {
         type: 'test'

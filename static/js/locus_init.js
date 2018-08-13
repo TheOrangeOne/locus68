@@ -13,7 +13,15 @@ Init.webSocket = function(opts, locus, next) {
     msg: 'connecting to room ' + Lib.prettyRoomName(room, 13)
   });
 
-  locus.initWithWS();
+  if (!window.WebSocket) {
+    opts.addLog({
+      type: 'error',
+      msg: 'websockets not supported in your browser'
+    });
+    return;
+  }
+
+  locus.initWithWS(window.WebSocket);
 
   // not sure if this is the best approach
   // we could also have this wait logic implemented on send
@@ -46,8 +54,8 @@ Init.location = function(opts, locus, next) {
     msg: 'getting location'
   });
 
-  if (opts.geolocation) {
-    opts.geolocation.getCurrentPosition(
+  if (opts.Geolocation) {
+    opts.Geolocation.getCurrentPosition(
       function(pos) {
         opts.addLog({
           type: 'info',

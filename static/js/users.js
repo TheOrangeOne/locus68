@@ -33,7 +33,7 @@ function Users(opts) {
 
   // returns the number of users stored
   this.numUsers = function() {
-    return self.users.length;
+    return self.list.length;
   };
 
   this.addUser = function(user) {
