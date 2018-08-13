@@ -95,6 +95,10 @@
   <div class="box">
     <div id="header" class="row header" v-cloak>
       <div id="room-name" class="room-name">
+        <i class="fas fa-exclamation-triangle" v-bind:style="{
+            display: isProd ? 'none' : 'fixed'
+          }">
+        </i>
         {{ roomNamePretty }}
       </div>
       <div id="settings-toggle" class="clickable"
