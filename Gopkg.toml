@@ -1,0 +1,21 @@
+[metadata.heroku]
+  root-package = "github.com/TheOrangeOne/locus68"
+  go-version = "go1.9.1"
+  install = [ "." ]
+
+[[constraint]]
+  name = "github.com/gorilla/mux"
+  version = "1.6.2"
+
+[[constraint]]
+  name = "github.com/gorilla/websocket"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/namsral/flag"
+  version = "1.7.4-pre"
+
+[prune]
+  go-tests = true
+  unused-packages = true
+
