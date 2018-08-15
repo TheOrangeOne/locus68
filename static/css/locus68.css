@@ -69,9 +69,6 @@ h1, h2 {
 .img-circle {
   border-radius: 50%;
 }
-.img-circle:hover {
-  opacity: 0.8;
-}
 
 .user-lock {
   width: 3.5em;
@@ -226,6 +223,10 @@ https://purecss.io/grids/
 .select-avatar {
   width: 2.5em;
   height: 2.5em;
+}
+
+.select-avatar:hover {
+  opacity: 0.8;
 }
 
 .selected-avatar {
