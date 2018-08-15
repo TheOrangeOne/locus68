@@ -52,6 +52,7 @@ function Socket(opts) {
 
   // returns whether the socket is ready to communicate
   this.isReady = function() {
+    if (!self.conn) return Socket.STATE.CLOSED;
     return self.conn.readyState === Socket.STATE.OPEN;
   };
 
@@ -59,7 +60,7 @@ function Socket(opts) {
     if (!self.conn) {
       return false;
     }
-    if (conn.readyState !== Socket.STATE.OPEN) {
+    if (self.conn.readyState !== Socket.STATE.OPEN) {
       return false;
     }
     var smsg = JSON.stringify(msg);
@@ -73,9 +74,14 @@ function Socket(opts) {
   };
 
   this.reconnect = function() {
-    var status = self.conn.readyState;
+    var status;
+    if (self.conn) {
+      status = self.conn.readyState;
+    }
+    status = Socket.STATE.CLOSED;
+
     if (status !== Socket.STATE.OPEN &&
-        status !== Socket.STATUS.CONNECTING) {
+        status !== Socket.STATE.CONNECTING) {
       self.init();
     }
   };
@@ -90,12 +96,20 @@ function Socket(opts) {
       console.error('browser does not support websockets');
       return false;
     }
-    conn = new self.WebSocket(self.getURL());
 
-    conn.onopen = self.onopen;
-    conn.onmessage = self.onmessage;
-    conn.onclose = self.onclose;
-    conn.onerror = self.onerror;
+    var conn;
+
+    try {
+      conn = new self.WebSocket(self.getURL());
+      conn.onopen = self.onopen;
+      conn.onmessage = self.onmessage;
+      conn.onclose = self.onclose;
+      conn.onerror = self.onerror;
+    } catch (e) {
+      // TODO: some better indication of failure to the user
+      self.status = Socket.STATE.CLOSED;
+      conn = null;
+    }
 
     // set the connection
     self.conn = conn;
