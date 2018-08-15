@@ -7,6 +7,10 @@ var { WebSocket, Server } = require('./mock-socket.min.js');
 
 function NoopWebSocket(opts) {};
 
+function ErrorWebSocket(opts) {
+  throw new Error('ERR connection refused');
+};
+
 function MockCrypto(opts) {
   opts = opts || {};
   assert(opts.pass);
@@ -37,6 +41,14 @@ describe('Socket', function() {
       var sock = new Socket(mockOpts);
       assert.equal(sock.status, Socket.STATE.CONNECTING);
       server.stop();
+    });
+
+    it('should not error out on failure', function() {
+      var sock = new Socket({
+        ...mockOpts,
+        WebSocket: ErrorWebSocket
+      });
+      assert.equal(sock.status, Socket.STATE.CLOSED);
     });
   });
 
@@ -93,6 +105,53 @@ describe('Socket', function() {
           server.stop(done);
         }, 15);
       }, 15);
+    });
+  });
+
+  describe('reconnect', function() {
+    it('should noop when the status open or connecting', () => {
+      var sock = new Socket({
+        ...mockOpts,
+        WebSocket: NoopWebSocket,
+        onMsg: function(msg) {
+          messages.push(msg);
+        }
+      });
+
+      sock.status = Socket.STATE.OPEN;
+      sock.reconnect()
+      assert.equal(sock.status, Socket.STATE.OPEN);
+
+      sock.status = Socket.STATE.CONNECTING;
+      sock.reconnect()
+      assert.equal(sock.status, Socket.STATE.CONNECTING);
+    });
+
+    it('should reinit when the status is closed', () => {
+      var count = 0;
+
+      // increment count so we can confirm it was run
+      // also throw an error to make the socket status
+      // Socket.STATE.CLOSED
+      function TestSocket(url) {
+        count += 1;
+        throw new Error('test');
+      };
+
+      var sock = new Socket({
+        ...mockOpts,
+        WebSocket: TestSocket,
+        onMsg: function(msg) {
+          messages.push(msg);
+        }
+      });
+
+      assert.equal(count, 1);
+      assert.equal(sock.status, 3);
+
+      sock.reconnect();
+      assert.equal(count, 2);
+      assert.equal(sock.status, 3);
     });
   });
 });
