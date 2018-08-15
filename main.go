@@ -1,14 +1,12 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/namsral/flag"
 	"log"
 	"net/http"
 )
-
-var addr = flag.String("addr", ":8080", "http service address")
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
@@ -42,12 +40,13 @@ func serveCreate(w http.ResponseWriter, r *http.Request, hotel *Hotel) {
 }
 
 func roomHandler(w http.ResponseWriter, r *http.Request, hotel *Hotel) {
-	// TODO
-	// if hotel.hasRoom() {}
 	http.ServeFile(w, r, "static/room.html")
 }
 
 func main() {
+	var host, port string
+	flag.StringVar(&host, "host", "", "http host")
+	flag.StringVar(&port, "port", "8080", "http port")
 	flag.Parse()
 	r := mux.NewRouter()
 	hotel := newHotel()
@@ -70,7 +69,10 @@ func main() {
 	http.Handle("/", r)
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static"))))
-	err := http.ListenAndServe(*addr, nil)
+	addr := fmt.Sprintf("%s:%s", host, port)
+	log.Printf("listening on %s:%s\n", host, port)
+	err := http.ListenAndServe(addr, nil)
+
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}

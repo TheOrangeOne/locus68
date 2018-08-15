@@ -1,6 +1,7 @@
 if (typeof window === 'undefined') {
   var Config = require('./conf.js'),
     Lib = require('./lib.js'),
+    MsgUser = require('./user.js').MsgUser,
     User = require('./user.js').User,
     Users = require('./users.js'),
     Crypt = require('./crypto.js'),
@@ -23,9 +24,16 @@ function Locus(opts) {
   this.user = opts.user || null;
   this.otherUsers = opts.otherUsers || null;
   this.socket = opts.socket || null;
-  this.map = null;
   this.host = opts.host || null;
+  // whether or not to persist to periodically localStorage
+  this.persistEnabled = opts.persistEnabled;
+  // whether user time since last seen updating is enabled
+  this.tslsEnabled = opts.tslsEnabled;
+  // whether or not to enable the UI (map and components)
+  this.uiEnabled = opts.uiEnabled;
+  this.Map = opts.Map || null;
   this.WebSocket = opts.WebSocket || null;
+  this.Geolocation = opts.Geolocation || null;
 
   this.MSG_HANDLER = {};  // used to look up msg handlers
 
@@ -159,8 +167,10 @@ function Locus(opts) {
   };
 
   this.persister = function() {
-    self.persist(false);
-    setTimeout(self.persister, Config.PERSIST_INTERVAL);
+    if (self.persistEnabled) {
+      self.persist(false);
+      setTimeout(self.persister, Config.PERSIST_INTERVAL);
+    }
   };
 
   this.isWSReady = function() {
@@ -214,27 +224,34 @@ function Locus(opts) {
   };
 
   this.initUser = function(lat, lng) {
-    self.user = self.user || new User({
-      lat: lat,
-      lng: lng
-    });
+    self.user = self.user || new User({});
+    self.user.updateLocation(lat, lng);
   };
 
   this.initOtherUsers = function() {
     self.otherUsers = self.otherUsers || new Users({
-      tslsEnabled: true
+      tslsEnabled: self.tslsEnabled
     });
   };
 
-  this.initLocationWatch = function(pos) {
-    setWatchLocation(self.handleLocationUpdate);
-    self.handleLocationUpdate(pos);
+  this.initLocationWatch = function() {
+    self.Geolocation.watchPosition(
+      self.handleLocationUpdate,
+      function(err) {
+        console.warn('ERROR(' + err.code + '): ' + err.message);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0
+      }
+    );
   };
 
-  this.initSocket = function() {
+  this.initSocket = function(WebSocket) {
     self.socket = self.socket || new Socket({
-      Crypt: Crypt,
-      proto: self.isHTTPS ? 'wss' : 'ws',
+      WebSocket: WebSocket,
+      Crypto: Crypt,
+      secure: self.isHTTPS,
       url: self.getWSURL(),
       pass: self.pass,
       onMsg: self.onMsg,
@@ -244,7 +261,7 @@ function Locus(opts) {
   };
 
   this.initMap = function() {
-    self.map = new Map({
+    self.map = self.Map || new Map({
       user: self.user,
       otherUsers: self.otherUsers
     });
@@ -256,8 +273,8 @@ function Locus(opts) {
     self.initOtherUsers();
   };
 
-  this.initWithWS = function() {
-    self.initSocket();
+  this.initWithWS = function(WebSocket) {
+    self.initSocket(WebSocket);
   };
 
   /**
@@ -273,11 +290,16 @@ function Locus(opts) {
    * send out our first update to notify other clients.
    */
   this.initFinalize = function() {
-    self.initMap();
-    self.initComponents();
+    if (self.uiEnabled) {
+      self.initMap();
+      self.initComponents();
+    }
 
     self.initLocationWatch();
+
     self.persister();
+
+    // send out the initial update message
     self.sendUpdateMsg();
 
     // use this to add users for testing

@@ -1,0 +1,16 @@
+{
+  "name": "locus68",
+  "scripts": {},
+  "env": {},
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "addons": [],
+  "buildpacks": [
+    {
+      "url": "heroku/go"
+    }
+  ]
+}

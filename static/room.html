@@ -18,6 +18,7 @@
     <script src="/static/js/vue.min.js" type="text/javascript"></script>
     <!--<script src="/static/js/vue.js" type="text/javascript"></script>-->
     <script src="/static/js/forge.min.js" type="text/javascript"></script>
+    <script src="/static/js/reconnecting-websocket.min.js" type="text/javascript"></script>
   </head>
   <body>
     <div id="init-overlay"
@@ -187,7 +188,6 @@
   <script src="/static/js/conf.js"></script>
   <script src="/static/js/user.js"></script>
   <script src="/static/js/users.js"></script>
-  <script src="/static/js/loc.js"></script>
   <script src="/static/js/socket.js"></script>
   <script src="/static/js/crypto.js"></script>
   <script src="/static/js/map.js"></script>
@@ -199,8 +199,11 @@
         host: document.location.host,
         path: window.location.pathname,
         isHTTPS: location.protocol === 'https:',
-        geolocation: navigator.geolocation,
-        WebSocket: window.WebSocket
+        Geolocation: navigator.geolocation,
+        WebSocket: ReconnectingWebSocket,
+        persistEnabled: true,
+        tslsEnabled: true,
+        uiEnabled: true
       });
     };
   </script>
