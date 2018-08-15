@@ -78,6 +78,7 @@ h1, h2 {
   border-style: solid;
   background-color: grey;
   background: rgba(187, 187, 187, 0.28);
+  vertical-align: middle;
 }
 
 .untracked {
@@ -384,3 +385,43 @@ https://purecss.io/grids/
   color: #E9B872;
 }
 
+#chat {
+  display: inline-block;
+  margin-right: 1em;
+  vertical-align: middle;
+}
+
+#chat-content {
+  width: 100%;
+  font-size: 1.2em;
+}
+
+#chat-toggle {
+  font-size: 3.0em;
+}
+
+#chat-overlay {
+  position: fixed;
+  display: none;
+  width: 90%;
+  height: 80%;
+  top: 0;
+  bottom: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #fdf6e3;
+  z-index: 100000;
+}
+
+#msg-wrapper {
+  width: 100%;
+  text-align: center;
+  position: absolute;
+  bottom: 0;
+}
+
+.chat-avatar {
+  width: 1em;
+  height: 1em;
+}
