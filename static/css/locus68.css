@@ -69,6 +69,9 @@ h1, h2 {
 .img-circle {
   border-radius: 50%;
 }
+.img-circle:hover {
+  opacity: 0.8;
+}
 
 .user-lock {
   width: 3.5em;
@@ -134,6 +137,18 @@ https://purecss.io/grids/
   opacity: 0
 }
 
+.fa-times {
+  float: right;
+  color: rgb(174, 180, 189);
+  position: absolute;
+  top: 8px;
+  right: 20px;
+}
+
+.fa-times:hover {
+  color: rgb(246, 131, 23);
+}
+
 .left {
   float: left;
   text-align: left;
@@ -194,6 +209,7 @@ https://purecss.io/grids/
 /* overlay with user configurable settings */
 #settings-overlay {
   position: fixed;
+  border-radius: 3%;
   display: none;
   width: 90%;
   height: 80%;
@@ -202,8 +218,8 @@ https://purecss.io/grids/
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #fdf6e3;
-  opacity: 0.9;
+  background-color: white;
+  opacity: 0.90;
   z-index: 100000;
 }
 
