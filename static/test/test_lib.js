@@ -54,4 +54,13 @@ describe('Lib', function() {
       assert.equal(Lib.prettyRoomName(name, 13), 'myverylongroo...');
     });
   });
+
+  describe('isProd', function() {
+    it('should be true for localhost', function() {
+      assert(Lib.isProd('localhost:8080'));
+    });
+    it('should be false for something random', function() {
+      assert(!Lib.isProd('whatintheworld'));
+    });
+  });
 });

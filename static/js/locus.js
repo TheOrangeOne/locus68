@@ -213,8 +213,13 @@ function Locus(opts) {
         reconnect: self.reconnect
       },
       computed: {
+        isProd: function() {
+          return Lib.isProd(self.host);
+        },
         roomNamePretty: function() {
-          return Lib.prettyRoomName(this.roomname, 13);
+          var prefix = Lib.isProd(self.host) ? '' : '[TEST VERSION] ';
+          var name = Lib.prettyRoomName(this.roomname, 13);
+          return prefix + name;
         },
         socketStatus: function() {
           return this.socket.status;

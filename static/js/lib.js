@@ -90,6 +90,14 @@ Lib.prettyRoomName = function(roomName, n) {
   return roomName.substr(0, n) + ellip;
 };
 
+var PROD_URLS = {
+  'localhost:8080': true,
+  'meatmap.fun': true
+};
+Lib.isProd = function(url) {
+  return url in PROD_URLS;
+};
+
 if (typeof window === 'undefined') {
   module.exports = Lib;
 }
