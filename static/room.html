@@ -63,13 +63,10 @@
         <div class="pure-u-1 pure-u-md-1-3 l-box">
           <h2>room</h2>
           <div class="pure-control-group">
+            <i class="fas fa-times fa-2x" id="exit" v-on:click="exitSettings"></i>
             <btn-full
               v-on:click.native="leaveRoom"
               text="leave"
-            ></btn-full>
-            <btn-full
-              v-on:click.native="exitSettings"
-              text="exit"
             ></btn-full>
           </div>
         </div>
