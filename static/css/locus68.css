@@ -68,7 +68,7 @@ h1, h2 {
 /* stolen from https://www.abeautifulsite.net/how-to-make-rounded-images-with-css */
 .img-circle {
   border-radius: 50%;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 .img-circle:hover {
   opacity: 1;
