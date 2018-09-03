@@ -114,6 +114,27 @@
         </i>
       </div>
     </div>
+    <div id="chat-overlay" v-bind:style="{
+      display: visible ? 'block' : 'none'
+    }"
+    >
+    <div id="chat-content">
+      <div style="display: block;">
+        <p v-for="msg in chat.messages" class="chat-text">
+          <img class="chat-avatar" v-bind:src="msg.img"></img>
+          {{ msg.text }}
+        </p>
+      </div>
+      <div id="msg-wrapper">
+        <input id="room-key"
+               type="text"
+               placeholder="type your message"
+               size="32"
+               @keyup.enter="onEnter"
+               />
+      </div>
+    </div>
+  </div>
     <div id="map" class="row content">
       <div v-cloak id="group-lock" v-on:click="click" v-bind:class="{
         untracked: !map.groupLock
@@ -184,31 +205,10 @@
           </img>
         </div>
         <div id="chat">
-          <div id="chat-toggle" v-on:click="toggleVisible">
+          <div id="chat-toggle" v-on:click="onChatClick">
             <i v-cloak class="fas fa-comments"></i>
           </div>
-          <div id="chat-overlay" v-bind:style="{
-              display: visible ? 'block' : 'none'
-            }"
-          >
-            <div id="chat-content">
-              <div style="display: block;">
-                <p v-for="msg in chat.messages">
-                  <img class="chat-avatar" v-bind:src="msg.img"></img>
-                  {{ msg.text }}
-                </p>
-              </div>
-              <div id="msg-wrapper">
-                <input id="room-key"
-                       type="text"
-                       placeholder="type your message"
-                       size="32"
-                       @keyup.enter="onEnter"
-                       />
-              </div>
-            </div>
-          </div>
-        </div>
+        </div> 
       </div>
     </div>
   </div>

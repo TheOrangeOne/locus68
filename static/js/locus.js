@@ -225,10 +225,12 @@ function Locus(opts) {
       data: {
         roomname: self.roomName,
         socket: self.socket,
+        reconnect: self.reconnect
+      },
+      methods: {
         onSettingsClick: function(ev) {
           self.settingsVue.visible = !self.settingsVue.visible;
-        },
-        reconnect: self.reconnect
+        }
       },
       computed: {
         roomNamePretty: function() {
@@ -240,16 +242,22 @@ function Locus(opts) {
       }
     });
 
-    self.chatVue = new Vue({
+    self.chat = new Vue({
       el: '#chat',
+      data: {
+        onChatClick: function(ev) {
+          self.chatOverlayVue.visible = !self.chatOverlayVue.visible;
+        }
+      }
+    });
+
+    self.chatOverlayVue = new Vue({
+      el: '#chat-overlay',
       data: {
         visible: false,
         chat: self.chat
       },
       methods: {
-        toggleVisible: function(e) {
-          this.visible = !this.visible;
-        },
         onEnter: function(e) {
           if (e.target.value) {
             var text = e.target.value;

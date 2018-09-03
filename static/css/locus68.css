@@ -412,6 +412,8 @@ https://purecss.io/grids/
   transform: translate(-50%, -50%);
   background-color: #fdf6e3;
   z-index: 100000;
+  overflow-y: auto;
+  opacity: 0.9;
 }
 
 #msg-wrapper {
@@ -422,6 +424,12 @@ https://purecss.io/grids/
 }
 
 .chat-avatar {
-  width: 1em;
-  height: 1em;
+  width: 1.5em;
+  height: 1.5em;
+  padding-left:20px;
+}
+
+.chat-text {
+  font-size: 2em;
+  vertical-align: middle;
 }
