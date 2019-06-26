@@ -1,5 +1,4 @@
 bin/
-src/github.com/
-/locus68
-.DS_Store
 vendor/
+.DS_Store
+.idea
