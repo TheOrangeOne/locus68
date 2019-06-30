@@ -11,7 +11,6 @@ if (typeof window === 'undefined') {
 
 var MSG_TYPE = Config.MSG_TYPE;
 
-
 /**
  * the main application
  */

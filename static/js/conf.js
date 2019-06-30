@@ -1,4 +1,5 @@
 function Configuration() {
+  this.DB_VERSION = 0;
   this.NUM_AVATARS = 25;
 
   this.AVATARS = [];

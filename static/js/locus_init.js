@@ -1,4 +1,4 @@
-function Init() {};
+function Init() {}
 
 /**
  * Attempts to initialize a websocket connection with the
@@ -45,7 +45,7 @@ Init.webSocket = function(opts, locus, next) {
  * Attempts to get an initial location by querying the
  * geolocation provider.
  *
- * if successfull then adds the location information to opts
+ * if successful then adds the location information to opts
  * and calls next
  */
 Init.location = function(opts, locus, next) {
@@ -91,21 +91,20 @@ Init.restore = function(opts, next) {
     msg: 'checking for saved data'
   });
 
-  var serState = localStorage.getItem(opts.roomName) || {};
+  var state;
   try {
-    serState = JSON.parse(serState);
-    console.log(serState);
-    state = Locus.deserialize(serState);
-
-    // copy the deserialized state into opts
-    for (item in state) {
-      opts[item] = state[item];
-    }
+    state = Db.load(opts.roomName, Locus, Conf.DB_VERSION);
   } catch(e) {
+    console.log(e);
     opts.addLog({
       type: 'warn',
       msg: 'failed to restore state'
     });
+    state = {};
+  }
+
+  for (item in state) {
+    opts[item] = state[item];
   }
 
   console.log(opts);
@@ -143,7 +142,7 @@ Init.room = function(opts, next) {
     opts.roomName = path.substr(3, path.length);
     next(opts);
   }
-  else if (path === '/x' || path == '/x/') {
+  else if (path === '/x' || path === '/x/') {
     opts.roomKeyEnabled = true;
     opts.roomKeyVisible = true;
 
@@ -176,7 +175,7 @@ Init.room = function(opts, next) {
  * Initializes a Locus instance in the browser.
  *
  * this deals with async stuff like obtaining a web socket
- * connection, location information
+ * connection, location information, etc
  */
 Init.init = function(opts) {
   var initopts = {
