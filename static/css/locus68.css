@@ -68,11 +68,8 @@ h1, h2 {
 /* stolen from https://www.abeautifulsite.net/how-to-make-rounded-images-with-css */
 .img-circle {
   border-radius: 50%;
-  opacity: 0.5;
 }
-.img-circle:hover {
-  opacity: 1;
-}
+
 .user-lock {
   width: 3.5em;
   height: 3.5em;
@@ -226,11 +223,10 @@ https://purecss.io/grids/
 .select-avatar {
   width: 2.5em;
   height: 2.5em;
+  opacity: 0.5;
 }
 
-
-
-.selected-avatar {
+.selected-avatar:hover {
   opacity: 1;
 }
 
