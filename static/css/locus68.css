@@ -220,13 +220,9 @@ https://purecss.io/grids/
   z-index: 100000;
 }
 
-.select-avatar {
+.selected-avatar {
   width: 2.5em;
   height: 2.5em;
-  opacity: 0.5;
-}
-
-.selected-avatar:hover {
   opacity: 1;
 }
 
