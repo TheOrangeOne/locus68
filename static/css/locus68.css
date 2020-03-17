@@ -206,7 +206,7 @@ https://purecss.io/grids/
 /* overlay with user configurable settings */
 #settings-overlay {
   position: fixed;
-  border-radius: 3%;
+  border-radius: 4%;
   display: none;
   width: 90%;
   height: 80%;
@@ -220,17 +220,14 @@ https://purecss.io/grids/
   z-index: 100000;
 }
 
-.select-avatar {
+#settings-overlay .img-circle {
   width: 2.5em;
   height: 2.5em;
+  opacity: 0.5;
 }
 
-.select-avatar:hover {
-  opacity: 0.8;
-}
-
-.selected-avatar {
-  opacity: 0.2;
+#settings-overlay .selected-avatar {
+  opacity: 1;
 }
 
 .clickable {

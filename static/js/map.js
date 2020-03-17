@@ -303,7 +303,7 @@ MapView.DOUBLE_CLICK = 1;
 MapView.FOCUS_ZOOM = 18;
 
 MapView.mapIcon = function(size, img) {
-  var classes = 'img-circle ';
+  var classes = 'img-circle selected-avatar';
   return L.icon({
     iconUrl: img,
     iconSize: [size,size],
@@ -314,7 +314,7 @@ MapView.mapIcon = function(size, img) {
 };
 
 MapView.userIcon = function(user) {
-  var classes = 'img-circle ';
+  var classes = 'img-circle selected-avatar';
   return L.icon({
     iconUrl: user.img,
     iconSize: [Config.ICON_SIZE, Config.ICON_SIZE],
