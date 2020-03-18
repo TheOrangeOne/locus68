@@ -7,3 +7,8 @@ Vue.component('btn-room', {
   props: ['text'],
   template: '<button type=button class="pure-button full room-button">{{ text }}</button>'
 });
+
+Vue.component('chat-msg', {
+  props: ['text'],
+  template: ''
+});

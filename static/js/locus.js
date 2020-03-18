@@ -4,6 +4,7 @@ if (typeof window === 'undefined') {
     MsgUser = require('./user.js').MsgUser,
     User = require('./user.js').User,
     Users = require('./users.js'),
+    Chat = require('./chat.js'),
     Crypt = require('./crypto.js'),
     Socket = require('./socket.js'),
     Map = require('./map.js')
@@ -34,6 +35,7 @@ function Locus(opts) {
   this.Map = opts.Map || null;
   this.WebSocket = opts.WebSocket || null;
   this.Geolocation = opts.Geolocation || null;
+  this.Chat = opts.Chat || Chat;
 
   this.MSG_HANDLER = {};  // used to look up msg handlers
 
@@ -74,6 +76,10 @@ function Locus(opts) {
     if (self.user.isReady()) {
       self.sendMsg(MSG_TYPE.USER_UPDATE, self.updateMsg());
     }
+  };
+
+  this.sendChatMsg = function(msg) {
+    self.sendMsg(MSG_TYPE.USER_MSG, msg);
   };
 
   // returns a url to the websocket to use for this room and user
@@ -131,6 +137,12 @@ function Locus(opts) {
   };
   this.registerMsgHandler(MSG_TYPE.USER_DISCONNECT, this.onDCMsg);
 
+  this.onChatMsg = function(userId, data) {
+    var otheruser = self.otherUsers.getUser(userId);
+    self.chat.add(otheruser, data);
+  };
+  this.registerMsgHandler(MSG_TYPE.USER_MSG, this.onChatMsg);
+
   // handle an incoming message
   this.onMsg = function(msg) {
     console.assert('user' in msg);
@@ -175,6 +187,12 @@ function Locus(opts) {
 
   this.isWSReady = function() {
     return self.socket.isReady();
+  };
+
+  this.onChatAdd = function(user, msg) {
+    if (user.id === self.user.id) {
+      self.sendChatMsg(msg);
+    }
   };
 
   this.initComponents = function() {
@@ -223,6 +241,26 @@ function Locus(opts) {
         },
         socketStatus: function() {
           return this.socket.status;
+        }
+      }
+    });
+
+    self.chatVue = new Vue({
+      el: '#chat',
+      data: {
+        visible: false,
+        chat: self.chat
+      },
+      methods: {
+        toggleVisible: function(e) {
+          this.visible = !this.visible;
+        },
+        onEnter: function(e) {
+          if (e.target.value) {
+            var text = e.target.value;
+            self.chat.add(self.user, { text: text });
+            e.target.value = '';
+          }
         }
       }
     });
@@ -282,6 +320,12 @@ function Locus(opts) {
     self.initSocket(WebSocket);
   };
 
+  this.initChat = function() {
+    self.chat = new self.Chat({
+      onAdd: self.onChatAdd
+    });
+  };
+
   /**
    * Once all other initialization has been done, then
    * it up by generating the map and view components.
@@ -295,6 +339,10 @@ function Locus(opts) {
    * send out our first update to notify other clients.
    */
   this.initFinalize = function() {
+
+    self.initOtherUsers();
+    self.initChat();
+
     if (self.uiEnabled) {
       self.initMap();
       self.initComponents();

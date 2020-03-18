@@ -187,6 +187,32 @@
           >
           </img>
         </div>
+        <div id="chat">
+          <div id="chat-toggle" v-on:click="toggleVisible">
+            <i v-cloak class="fas fa-comments"></i>
+          </div>
+          <div id="chat-overlay" v-bind:style="{
+              display: visible ? 'block' : 'none'
+            }"
+          >
+            <div id="chat-content">
+              <div style="display: block;">
+                <p v-for="msg in chat.messages">
+                  <img class="chat-avatar" v-bind:src="msg.img"></img>
+                  {{ msg.text }}
+                </p>
+              </div>
+              <div id="msg-wrapper">
+                <input id="room-key"
+                       type="text"
+                       placeholder="type your message"
+                       size="32"
+                       @keyup.enter="onEnter"
+                       />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -198,6 +224,7 @@
   <script src="/static/js/socket.js"></script>
   <script src="/static/js/crypto.js"></script>
   <script src="/static/js/map.js"></script>
+  <script src="/static/js/chat.js"></script>
   <script src="/static/js/locus.js"></script>
   <script src="/static/js/locus_init.js"></script>
   <script>
